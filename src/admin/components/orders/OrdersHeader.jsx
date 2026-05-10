@@ -1,11 +1,9 @@
-import { useState } from "react";
+import React from "react";
 import { Box, Typography, Button } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 
-import AddProductModal from "./AddProductModal";
 
-export default function ProductsHeader() {
-  const [openModal, setOpenModal] = useState(false);
+export default function OrdersHeader() {
 
   return (
     <>
@@ -26,7 +24,7 @@ export default function ProductsHeader() {
             fontWeight="bold"
             sx={{ color: "#111827" }}
           >
-            Products
+            Orders
           </Typography>
 
           <Typography
@@ -36,40 +34,34 @@ export default function ProductsHeader() {
               mt: 0.5
             }}
           >
-            Manage your product inventory
+            Manage and track customer orders
           </Typography>
         </Box>
 
         {/* RIGHT */}
         <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setOpenModal(true)}
+          variant="outlined"
+          startIcon={<FileDownloadOutlinedIcon />}
           sx={{
-            bgcolor: "#020617",
-            color: "#fff",
+            color: "#111827",
             px: 3,
             py: 1.3,
+            border: "1px solid #e5e7eb",
             borderRadius: 3,
             textTransform: "none",
             fontWeight: 600,
             fontSize: "1rem",
             boxShadow: "none",
             "&:hover": {
-              bgcolor: "#111827",
+              bgcolor: "#f5f5f5",
+              border: "1px solid #e5e7eb",
               boxShadow: "none"
             }
           }}
         >
-          Add Product
+          Export Orders
         </Button>
       </Box>
-
-      {/* MODAL */}
-      <AddProductModal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-      />
     </>
   );
 }
