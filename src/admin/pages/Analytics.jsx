@@ -3,6 +3,13 @@ import { Box, Grid } from "@mui/material";
 
 import AnalyticsHeader from "../components/analytics/AnalyticsHeader";
 import AnalyticsStatCard from "../components/analytics/AnalyticsStatCard";
+import RevenueTrendChart from "../components/analytics/RevenueTrendChart";
+import OrdersCustomersChart from "../components/analytics/OrdersCustomersChart";
+import RevenueCategoryChart from "../components/analytics/RevenueCategoryChart";
+import CustomerSegmentsChart from "../components/analytics/CustomerSegmentsChart";
+import TopProductsRevenueChart from "../components/analytics/TopProductsRevenueChart";
+import OrdersTimeChart from "../components/analytics/OrdersTimeChart";
+import PerformanceRadarChart from "../components/analytics/PerformanceRadarChart";
 
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -65,6 +72,40 @@ export default function Analytics() {
             color="#f97316"
             negative
           />
+        </Grid>
+      </Grid>
+
+      {/* CHARTS */}
+      <Grid container spacing={3} sx={{ mt: 1 }}>
+        <Grid item xs={12} lg={6}>
+          <RevenueTrendChart />
+        </Grid>
+
+        <Grid item xs={12} lg={6}>
+          <OrdersCustomersChart />
+        </Grid>
+
+        <Grid item xs={12} lg={6}>
+          <RevenueCategoryChart />
+        </Grid>
+
+        <Grid item xs={12} lg={6}>
+          <CustomerSegmentsChart />
+        </Grid>
+      </Grid>
+
+      {/* EXTRA ANALYTICS */}
+      <Grid container spacing={3} mt={1}>
+        <Grid item xs={12} md={6}>
+          <TopProductsRevenueChart />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <OrdersTimeChart />
+        </Grid>
+
+        <Grid item xs={12}>
+          <PerformanceRadarChart />
         </Grid>
       </Grid>
     </Box>
