@@ -5,8 +5,7 @@ import AddProduct from "../pages/AddProduct";
 import OrdersPage from "../pages/OrdersPage";
 import Customers from "../pages/Customers";
 import Analytics from "../pages/Analytics";
-// import Orders from "../pages/Orders";
-// import Reviews from "../pages/Reviews";
+import SettingsPanel from "../pages/SettingsPanel";
 import AdminLayout from "../components/AdminLayout";
 
 export default function AdminRoutes() {
@@ -19,6 +18,7 @@ export default function AdminRoutes() {
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="/customers" element={<Customers />}/>
         <Route path="/analytics" element={<Analytics />}/>
+        <Route path="settings" element={<SettingsPanel />}/>
         {/* <Route path="/reviews" element={<Reviews />} /> */}
       </Routes>
     </AdminLayout>
