@@ -1,221 +1,343 @@
-import { useState } from "react";
-import { Box, Grid, Typography } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+
+import {
+  Box,
+  Grid,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 
 import ProductToolbar from "../components/products/ProductToolbar";
 import ProductCard from "../components/products/ProductCard";
 import ProductListTable from "../components/products/ProductListTable";
 import ProductsHeader from "../components/products/ProductsHeader";
+import AddProductModal from "../components/products/AddProductModal";
 
-import products from "../data/products";
+
+// Firebase product services
+import {
+  getProducts,
+} from "../../firebase/products";
+
+
 
 export default function ProductsPage() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
-  const [stock, setStock] = useState("All");
-  const [view, setView] = useState("grid");
 
-  // FILTER PRODUCTS
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.sku.toLowerCase().includes(search.toLowerCase());
+  /* -------------------------------------------------------------------------- */
+  /*                                   STATES                                   */
+  /* -------------------------------------------------------------------------- */
 
-    const matchesCategory =
-      category === "All" || product.category === category;
+  // Products state from Firebase
+  const [products, setProducts] =
+    useState([]);
 
-    const matchesStock =
-      stock === "All" || product.status === stock;
+  // Loading state
+  const [loading, setLoading] =
+    useState(true);
 
-    return matchesSearch && matchesCategory && matchesStock;
-  });
+  // Modal state
+  const [openAddModal, setOpenAddModal] =
+    useState(false);
+
+  // Filter states
+  const [search, setSearch] =
+    useState("");
+
+  const [category, setCategory] =
+    useState("All");
+
+  const [stock, setStock] =
+    useState("All");
+
+  const [view, setView] =
+    useState("grid");
+
+
+
+  /* -------------------------------------------------------------------------- */
+  /*                             FETCH PRODUCTS                                 */
+  /* -------------------------------------------------------------------------- */
+
+  const fetchProducts = async () => {
+
+    try {
+
+      setLoading(true);
+
+      // Fetch products from Firestore
+      const data =
+        await getProducts();
+
+      console.log(
+        "FIREBASE PRODUCTS:",
+        data
+      );
+
+      setProducts(data);
+
+    } catch (error) {
+
+      console.log(
+        "FETCH PRODUCTS ERROR:",
+        error
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
+  };
+
+
+
+  /* -------------------------------------------------------------------------- */
+  /*                              INITIAL LOAD                                  */
+  /* -------------------------------------------------------------------------- */
+
+  useEffect(() => {
+
+    fetchProducts();
+
+  }, []);
+
+
+
+
+  /* -------------------------------------------------------------------------- */
+  /*                               ADD PRODUCT                                  */
+  /* -------------------------------------------------------------------------- */
+
+  // Product is already added to Firebase
+  // This only updates local UI instantly
+  const handleAddProduct = (
+    newProduct
+  ) => {
+
+    setProducts((prev) => [
+      newProduct,
+      ...prev,
+    ]);
+
+    setOpenAddModal(false);
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /*                              FILTER PRODUCTS                               */
+  /* -------------------------------------------------------------------------- */
+
+  const filteredProducts =
+    useMemo(() => {
+
+      return products.filter(
+        (product) => {
+
+          // Search filter
+          const matchesSearch =
+
+            product.name
+              ?.toLowerCase()
+              .includes(
+                search.toLowerCase()
+              ) ||
+
+            product.sku
+              ?.toLowerCase()
+              .includes(
+                search.toLowerCase()
+              );
+
+          // Category filter
+          const matchesCategory =
+            category === "All" ||
+            product.category?.name ===
+              category;
+
+          // Stock filter
+          const matchesStock =
+
+            stock === "All" ||
+
+            product.status === stock;
+
+
+
+          return (
+            matchesSearch &&
+            matchesCategory &&
+            matchesStock
+          );
+        }
+      );
+
+    }, [
+      products,
+      search,
+      category,
+      stock,
+    ]);
+
+  /* -------------------------------------------------------------------------- */
+  /*                                  LOADING                                   */
+  /* -------------------------------------------------------------------------- */
+
+  if (loading) {
+
+    return (
+
+      <Box
+        sx={{
+          minHeight: "60vh",
+
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box p={1}>
-        {/* HEADER */}
-        <ProductsHeader />
 
-      {/* TOOLBAR */}
+      {/* -------------------------------------------------------------------------- */}
+      {/*                                   HEADER                                   */}
+      {/* -------------------------------------------------------------------------- */}
+
+      <ProductsHeader
+        onAddProduct={() =>
+          setOpenAddModal(true)
+        }
+      />
+
+      {/* -------------------------------------------------------------------------- */}
+      {/*                                  TOOLBAR                                   */}
+      {/* -------------------------------------------------------------------------- */}
+
       <ProductToolbar
         search={search}
         setSearch={setSearch}
+
         category={category}
         setCategory={setCategory}
+
         stock={stock}
         setStock={setStock}
+
         view={view}
         setView={setView}
       />
 
-      {/* COUNT */}
-      <Typography sx={{ mt: 3, mb: 3 }} color="text.secondary">
-        Showing {filteredProducts.length} of {products.length} products
+      {/* -------------------------------------------------------------------------- */}
+      {/*                                   COUNT                                    */}
+      {/* -------------------------------------------------------------------------- */}
+
+      <Typography
+        sx={{
+          mt: 3,
+          mb: 3,
+        }}
+        color="text.secondary"
+      >
+
+        Showing{" "}
+
+        <strong>
+          {filteredProducts.length}
+        </strong>{" "}
+
+        of{" "}
+
+        <strong>
+          {products.length}
+        </strong>{" "}
+
+        products
+
       </Typography>
 
-      {/* GRID VIEW */}
-      {view === "grid" && (
+      {/* -------------------------------------------------------------------------- */}
+      {/*                                EMPTY STATE                                 */}
+      {/* -------------------------------------------------------------------------- */}
+
+      {!loading &&
+        filteredProducts.length === 0 && (
+        <Box
+          sx={{
+            py: 10,
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            mb={1}
+          >
+            No Products Found
+          </Typography>
+
+          <Typography
+            color="text.secondary"
+          >
+            {category} products added in store will appear here.
+          </Typography>
+        </Box>
+      )}
+
+      {/* -------------------------------------------------------------------------- */}
+      {/*                                 GRID VIEW                                  */}
+      {/* -------------------------------------------------------------------------- */}
+
+      {view === "grid" &&
+        filteredProducts.length > 0 && (
         <Grid container spacing={3}>
-          {filteredProducts.map((product) => (
-            <Grid item xs={12} sm={6} md={3} key={product.id}>
-              <ProductCard product={product} />
-            </Grid>
-          ))}
+          {filteredProducts.map(
+            (product) => (
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                lg={3}
+                key={product.id}
+              >
+                <ProductCard
+                  product={product}
+                />
+              </Grid>
+            )
+          )}
         </Grid>
       )}
 
-      {/* LIST VIEW */}
-      {view === "list" && (
-        <ProductListTable products={filteredProducts} />
+      {/* -------------------------------------------------------------------------- */}
+      {/*                                 LIST VIEW                                  */}
+      {/* -------------------------------------------------------------------------- */}
+
+      {view === "list" &&
+        filteredProducts.length > 0 && (
+        <ProductListTable
+          products={
+            filteredProducts
+          }
+        />
       )}
+
+      {/* -------------------------------------------------------------------------- */}
+      {/*                              ADD PRODUCT MODAL                             */}
+      {/* -------------------------------------------------------------------------- */}
+
+      <AddProductModal
+        open={openAddModal}
+        onClose={() =>
+          setOpenAddModal(false)
+        }
+
+        onAddProduct={
+          handleAddProduct
+        }
+      />
     </Box>
   );
 }
-
-
-
-
-
-// import { useState } from "react";
-// import {
-//   Box,
-//   Typography,
-//   Grid
-// } from "@mui/material";
-
-// import ProductToolbar from "../components/products/ProductToolbar";
-// import ProductCard from "../components/products/ProductCard";
-
-// const productsData = [
-//   {
-//     id: 1,
-//     name: 'MacBook Pro M3 16"',
-//     category: 'Laptops',
-//     price: '$2,499',
-//     stock: '45 units',
-//     sales: '145 sold',
-//     status: 'In Stock'
-//   },
-//   {
-//     id: 2,
-//     name: 'iPhone 15 Pro Max',
-//     category: 'Phones',
-//     price: '$1,199',
-//     stock: '12 units',
-//     sales: '220 sold',
-//     status: 'Low Stock'
-//   },
-//   {
-//     id: 3,
-//     name: 'Dell XPS 15',
-//     category: 'Laptops',
-//     price: '$1,899',
-//     stock: '32 units',
-//     sales: '98 sold',
-//     status: 'In Stock'
-//   },
-//   {
-//     id: 4,
-//     name: 'iPad Pro 12.9"',
-//     category: 'Tablets',
-//     price: '$999',
-//     stock: '56 units',
-//     sales: '156 sold',
-//     status: 'In Stock'
-//   }
-// ];
-
-// export default function ProductsPage() {
-//   const [search, setSearch] = useState("");
-//   const [category, setCategory] = useState("All");
-//   const [stock, setStock] = useState("All");
-//   const [view, setView] = useState("grid");
-
-//   const filteredProducts = productsData.filter((product) => {
-//     const matchesSearch = product.name
-//       .toLowerCase()
-//       .includes(search.toLowerCase());
-
-//     const matchesCategory =
-//       category === "All" || product.category === category;
-
-//     const matchesStock =
-//       stock === "All" || product.status === stock;
-
-//     return matchesSearch && matchesCategory && matchesStock;
-//   });
-
-//   return (
-//     <Box sx={{ p: 3 }}>
-//       {/* HEADER */}
-//       <Box sx={{ mb: 3 }}>
-//         <Typography variant="h5" fontWeight="bold">
-//           Products
-//         </Typography>
-
-//         <Typography color="text.secondary">
-//           Manage and monitor product inventory
-//         </Typography>
-//       </Box>
-
-//       {/* TOOLBAR */}
-//       <ProductToolbar
-//         search={search}
-//         setSearch={setSearch}
-//         category={category}
-//         setCategory={setCategory}
-//         stock={stock}
-//         setStock={setStock}
-//         view={view}
-//         setView={setView}
-//       />
-
-//       {/* COUNT */}
-//       <Typography sx={{ mt: 3, mb: 3 }} color="text.secondary">
-//         Showing {filteredProducts.length} of {productsData.length} products
-//       </Typography>
-
-//       {/* PRODUCTS GRID */}
-//       <Grid container spacing={3}>
-//         {filteredProducts.map((product) => (
-//           <Grid item xs={12} sm={6} md={3} key={product.id}>
-//             <ProductCard product={product} />
-//           </Grid>
-//         ))}
-//       </Grid>
-//     </Box>
-//   );
-// }
-
-
-
-
-
-
-// import { Box, Typography, Button } from "@mui/material";
-// import { useNavigate } from "react-router-dom";
-
-// export default function Products() {
-//   const navigate = useNavigate();
-
-//   return (
-//     <Box>
-//       <Box
-//         sx={{
-//           display: "flex",
-//           justifyContent: "space-between",
-//           mb: 2
-//         }}
-//       >
-//         <Typography variant="h5">Products</Typography>
-
-//         <Button
-//           variant="contained"
-//           onClick={() => navigate("/admin/add-product")}
-//         >
-//           Add Product
-//         </Button>
-//       </Box>
-
-//       {/* Later: Table of products */}
-//     </Box>
-//   );
-// }

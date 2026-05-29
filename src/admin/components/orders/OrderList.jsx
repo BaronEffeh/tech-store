@@ -285,7 +285,7 @@ function OrderRow({ order }) {
 export default function OrderList({ orders = mockOrders }) {
   const [sortBy, setSortBy] = useState("all");
   const [page, setPage] = useState(0);
-  const rowsPerPage = 6;
+  const rowsPerPage = 7;
 
   /* ---------------- SORTING ---------------- */
 const sortedOrders = useMemo(() => {

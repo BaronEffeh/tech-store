@@ -69,7 +69,12 @@ export default function ProductToolbar({
         <MenuItem value="Laptops">Laptops</MenuItem>
         <MenuItem value="Phones">Phones</MenuItem>
         <MenuItem value="Tablets">Tablets</MenuItem>
+        <MenuItem value="Electronics">Electronics</MenuItem>
+        <MenuItem value="Wearables">Wearables</MenuItem>
         <MenuItem value="Accessories">Accessories</MenuItem>
+        <MenuItem value="Gaming">Gaming</MenuItem>
+        <MenuItem value="Deals">Deals</MenuItem>
+        <MenuItem value="Others">Others</MenuItem>
       </Select>
 
       {/* STOCK FILTER */}
@@ -82,6 +87,7 @@ export default function ProductToolbar({
         <MenuItem value="All">All</MenuItem>
         <MenuItem value="In Stock">In Stock</MenuItem>
         <MenuItem value="Low Stock">Low Stock</MenuItem>
+        <MenuItem value="Out of Stock">Out of Stock</MenuItem>
       </Select>
 
       {/* VIEW TOGGLE */}
