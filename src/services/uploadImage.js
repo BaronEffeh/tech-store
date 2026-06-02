@@ -47,3 +47,43 @@ export const uploadProductImage =
       return null;
     }
   };
+
+
+  
+export const deleteProductImage = async (
+  imageUrl
+) => {
+  try {
+    if (!imageUrl) return true;
+
+    // Extract file path from URL
+    const url = new URL(imageUrl);
+
+    const path = decodeURIComponent(
+      url.pathname.split("/storage/v1/object/public/products/")[1]
+    );
+
+    if (!path) return false;
+
+    const { error } =
+      await supabase.storage
+        .from("products")
+        .remove([path]);
+
+    if (error) {
+      console.error(
+        "DELETE IMAGE ERROR:",
+        error
+      );
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error(
+      "DELETE IMAGE ERROR:",
+      error
+    );
+    return false;
+  }
+};

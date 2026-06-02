@@ -361,7 +361,7 @@ export default function ProductListTable({
                       color="error"
                       onClick={() =>
                         onDelete?.(
-                          product
+                          product.id
                         )
                       }
                     >

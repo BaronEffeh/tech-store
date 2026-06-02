@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { React, /* useState*/ } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
-import AddProductModal from "./AddProductModal";
+// import AddProductModal from "./ProductFormModal";
 
-export default function ProductsHeader() {
-  const [openModal, setOpenModal] = useState(false);
+// export default function ProductsHeader() {
+//   const [openModal, setOpenModal] = useState(false);
+export default function ProductsHeader({
+  onAddProduct
+}) {
 
   return (
     <>
@@ -44,7 +47,8 @@ export default function ProductsHeader() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => setOpenModal(true)}
+          onClick={onAddProduct}
+          // onClick={() => setOpenModal(true)}
           sx={{
             bgcolor: "#020617",
             color: "#fff",
@@ -66,10 +70,10 @@ export default function ProductsHeader() {
       </Box>
 
       {/* MODAL */}
-      <AddProductModal
+      {/* <AddProductModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-      />
+      /> */}
     </>
   );
 }

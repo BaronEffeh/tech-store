@@ -17,23 +17,53 @@ const productsRef = collection(
 );
 
 
+// // CREATE PRODUCT
+// export const createProduct =
+//   async (productData) => {
 
-// CREATE PRODUCT
-export const createProduct =
-  async (productData) => {
+//     const data = {
+//       ...productData,
+
+//       createdAt: serverTimestamp(),
+
+//       updatedAt: serverTimestamp()
+//     };
+
+//     return await addDoc(
+//       productsRef,
+//       data
+//     );
+// };
+
+
+export const createProduct = async (
+  productData
+) => {
+  try {
 
     const data = {
       ...productData,
-
       createdAt: serverTimestamp(),
-
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     };
 
-    return await addDoc(
-      productsRef,
-      data
+    const docRef =
+      await addDoc(
+        productsRef,
+        data
+      );
+
+    return docRef;
+
+  } catch (error) {
+
+    console.error(
+      "FIRESTORE ADDDOC ERROR:",
+      error
     );
+
+    throw error;
+  }
 };
 
 
@@ -72,40 +102,51 @@ export const getProduct =
     };
 };
 
-
-
 // UPDATE PRODUCT
-export const updateProduct =
-  async (id, data) => {
-
-    const productDoc = doc(
+export const updateProduct = async (
+  productId,
+  productData
+) => {
+  try {
+    const productRef = doc(
       db,
       "products",
-      id
+      productId
     );
 
-    return await updateDoc(
-      productDoc,
-      {
-        ...data,
-        updatedAt: serverTimestamp()
-      }
+    await updateDoc(
+      productRef,
+      productData
     );
+
+    return true;
+  } catch (error) {
+    console.error(
+      "UPDATE PRODUCT ERROR:",
+      error
+    );
+
+    return false;
+  }
 };
-
 
 
 // DELETE PRODUCT
 export const deleteProduct =
-  async (id) => {
+  async (productId) => {
+    try {
+      await deleteDoc(
+        doc(db, "products", productId)
+      );
 
-    const productDoc = doc(
-      db,
-      "products",
-      id
-    );
+      return true;
 
-    return await deleteDoc(
-      productDoc
-    );
-};
+    } catch (error) {
+      console.log(
+        "DELETE PRODUCT ERROR:",
+        error
+      );
+
+      return false;
+    }
+  };

@@ -11,14 +11,19 @@ import ProductToolbar from "../components/products/ProductToolbar";
 import ProductCard from "../components/products/ProductCard";
 import ProductListTable from "../components/products/ProductListTable";
 import ProductsHeader from "../components/products/ProductsHeader";
-import AddProductModal from "../components/products/AddProductModal";
+import ProductFormModal from "../components/products/ProductFormModal";
+import ViewProductModal from "../components/products/ViewProductModal";
+import { deleteProductImage } from "../../services/uploadImage";
+// import EditProductModal from "../components/products/EditProductModal";
 
 
 // Firebase product services
 import {
   getProducts,
+  deleteProduct,
+  createProduct,
+  updateProduct,
 } from "../../firebase/products";
-
 
 
 export default function ProductsPage() {
@@ -51,6 +56,17 @@ export default function ProductsPage() {
 
   const [view, setView] =
     useState("grid");
+
+  const [selectedProduct, setSelectedProduct] =
+    useState(null);
+
+  const [openViewModal, setOpenViewModal] =
+    useState(false);
+  
+  const [
+    openEditModal,
+    setOpenEditModal,
+  ] = useState(false);
 
 
 
@@ -89,7 +105,6 @@ export default function ProductsPage() {
   };
 
 
-
   /* -------------------------------------------------------------------------- */
   /*                              INITIAL LOAD                                  */
   /* -------------------------------------------------------------------------- */
@@ -100,26 +115,156 @@ export default function ProductsPage() {
 
   }, []);
 
-
-
-
   /* -------------------------------------------------------------------------- */
   /*                               ADD PRODUCT                                  */
   /* -------------------------------------------------------------------------- */
 
-  // Product is already added to Firebase
-  // This only updates local UI instantly
-  const handleAddProduct = (
-    newProduct
+  const handleViewProduct = (
+    product
+  ) => {
+    setSelectedProduct(product);
+    setOpenViewModal(true);
+  };
+
+  const handleEditProduct =
+    (product) => {
+    setSelectedProduct(
+      product
+    );
+    setOpenEditModal(true);
+  };
+
+  // const handleCreateProduct = async (
+  //   productData
+  // ) => {
+  //   try {
+
+  //     console.log(
+  //       "CREATING PRODUCT:",
+  //       productData
+  //     );
+
+  //     const response =
+  //       await createProduct(productData);
+
+  //     console.log(
+  //       "FIRESTORE RESPONSE:",
+  //       response
+  //     );
+
+  //     setProducts(prev => [
+  //       {
+  //         id: response.id,
+  //         ...productData,
+  //       },
+  //       ...prev,
+  //     ]);
+
+  //     return response;
+
+  //   } catch (error) {
+
+  //     console.error(
+  //       "CREATE PRODUCT ERROR:",
+  //       error
+  //     );
+
+  //     throw error;
+  //   }
+  // };
+
+  const handleCreateProduct =
+    async (productData) => {
+      const response =
+        await createProduct(productData);
+
+      setProducts(prev => [
+        {
+          id: response.id,
+          ...productData,
+        },
+        ...prev,
+      ]);
+    };
+
+  const handleUpdateProduct = async (productData) => {
+    try {
+      await updateProduct(productData.id, productData);
+
+      setProducts((prev) =>
+        prev.map((item) =>
+          item.id === productData.id
+            ? productData
+            : item
+        )
+      );
+    } catch (error) {
+      console.log("UPDATE ERROR:", error);
+    }
+  };
+
+  const handleDeleteProduct = async (
+    product
   ) => {
 
-    setProducts((prev) => [
-      newProduct,
-      ...prev,
-    ]);
+    const confirmDelete =
+      window.confirm(
+        "Delete this product?"
+      );
 
-    setOpenAddModal(false);
+    if (!confirmDelete) return;
+
+    try {
+
+      // Delete image first
+      if (product.image) {
+        await deleteProductImage(
+          product.image
+        );
+      }
+
+      const success =
+        await deleteProduct(product.id);
+
+      if (success) {
+
+        setProducts((prev) =>
+          prev.filter(
+            (item) =>
+              item.id !== product.id
+          )
+        );
+      }
+
+    } catch (error) {
+
+      console.log(
+        "DELETE PRODUCT ERROR:",
+        error
+      );
+    }
   };
+
+  // const handleDeleteProduct =
+  //   async (productId) => {
+  //     const confirmDelete =
+  //       window.confirm(
+  //         "Delete this product?"
+  //       );
+
+  //     if (!confirmDelete) return;
+  //     const success =
+  //       await deleteProduct(productId);
+
+  //     if (success) {
+  //       setProducts((prev) =>
+  //         prev.filter(
+  //           (item) =>
+  //             item.id !== productId
+  //         )
+  //       );
+  //     }
+  //   };
 
   /* -------------------------------------------------------------------------- */
   /*                              FILTER PRODUCTS                               */
@@ -197,6 +342,12 @@ export default function ProductsPage() {
       </Box>
     );
   }
+
+
+  console.log(
+  "HANDLE CREATE:",
+  handleCreateProduct
+);
 
   return (
     <Box p={1}>
@@ -304,7 +455,19 @@ export default function ProductsPage() {
               >
                 <ProductCard
                   product={product}
+                  onView={() =>
+                    handleViewProduct(product)
+                  }
+                  onDelete={() =>
+                    handleDeleteProduct(product)
+                  }
+                  onEdit={() =>
+                    handleEditProduct(product)
+                  }
                 />
+                {/* <ProductCard
+                  product={product}
+                /> */}
               </Grid>
             )
           )}
@@ -317,27 +480,49 @@ export default function ProductsPage() {
 
       {view === "list" &&
         filteredProducts.length > 0 && (
-        <ProductListTable
-          products={
-            filteredProducts
-          }
-        />
+          <ProductListTable
+            products={filteredProducts}
+            onView={handleViewProduct}
+            onDelete={handleDeleteProduct}
+            onEdit={handleEditProduct}
+          />
       )}
 
       {/* -------------------------------------------------------------------------- */}
       {/*                              ADD PRODUCT MODAL                             */}
       {/* -------------------------------------------------------------------------- */}
 
-      <AddProductModal
+      <ProductFormModal
+        mode="add"
         open={openAddModal}
         onClose={() =>
           setOpenAddModal(false)
         }
+        onSubmit={handleCreateProduct}
+      />
 
-        onAddProduct={
-          handleAddProduct
+      <ViewProductModal
+        open={openViewModal}
+        onClose={() =>
+          setOpenViewModal(false)
+        }
+        product={selectedProduct}
+      />
+
+      <ProductFormModal
+        mode="edit"
+        open={openEditModal}
+        onClose={() =>
+          setOpenEditModal(false)
+        }
+        productData={
+          selectedProduct
+        }
+        onSubmit={
+          handleUpdateProduct
         }
       />
+
     </Box>
   );
 }

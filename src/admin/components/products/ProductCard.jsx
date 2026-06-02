@@ -1,5 +1,4 @@
 // ProductCard.jsx
-
 import {
   Paper,
   Box,
@@ -17,7 +16,6 @@ import LaptopMacIcon from "@mui/icons-material/LaptopMac";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import TabletMacIcon from "@mui/icons-material/TabletMac";
 import HeadphonesIcon from "@mui/icons-material/Headphones";
-
 
 
 /* -------------------------------------------------------------------------- */

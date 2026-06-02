@@ -31,9 +31,9 @@ import {
 } from '@mui/icons-material';
 
 // Firebase services
-import {
-  createProduct,
-} from '../../../firebase/products';
+// import {
+//   createProduct,
+// } from '../../../firebase/products';
 
 import { 
   getCategories 
@@ -41,7 +41,8 @@ import {
 
 // Supabase services
 import { 
-  uploadProductImage 
+  uploadProductImage,
+  deleteProductImage,
 } from '../../../services/uploadImage';
 
 
@@ -63,11 +64,28 @@ const initialProductState = {
   featured: false,
 };
 
-const AddProductModal = ({
+const ProductFormModal = ({
   open,
   onClose,
-  onAddProduct,
+  mode = "add",
+  productData = null,
+  onSubmit,
 }) => {
+// const ProductFormModal = ({
+//   open,
+//   onClose,
+//   onAddProduct,
+// }) => {
+
+// console.log("PRODUCT FORM PROPS", {
+//   mode,
+//   onSubmit,
+//   open,
+// });
+//   console.log("PRODUCT FORM PROPS", {
+//   mode,
+//   onSubmit,
+// });
 
   useEffect(() => {
     const fetchCategories =
@@ -79,6 +97,71 @@ const AddProductModal = ({
 
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (mode === "edit" && productData) {
+      setProduct({
+        ...productData,
+
+        category: productData.category
+          ? JSON.stringify(productData.category)
+          : "",
+
+        weight:
+          productData.shipping?.weight || "",
+
+        length:
+          productData.shipping?.dimensions?.length || "",
+
+        width:
+          productData.shipping?.dimensions?.width || "",
+
+        height:
+          productData.shipping?.dimensions?.height || "",
+      });
+
+      setTags(productData.tags || []);
+      setImagePreview(productData.image || "");
+    } else {
+      resetForm();
+    }
+  }, [mode, productData]);
+
+  // useEffect(() => {
+  //   if (mode === "edit" && productData) {
+  //     setProduct({
+  //       ...productData,
+
+  //       // category: JSON.stringify(
+  //       //   productData.category || ""
+  //       // ),
+  //       category: productData.category
+  //         ? JSON.stringify(productData.category)
+  //         : "",
+
+  //       weight:
+  //         productData.shipping?.weight || "",
+
+  //       length:
+  //         productData.shipping?.dimensions
+  //           ?.length || "",
+
+  //       width:
+  //         productData.shipping?.dimensions
+  //           ?.width || "",
+
+  //       height:
+  //         productData.shipping?.dimensions
+  //           ?.height || "",
+  //     });
+
+  //     setTags(productData.tags || []);
+
+  //     setImagePreview(
+  //       productData.image || ""
+  //     );
+  //   }
+  // }, [mode, productData]);
 
   const [toast, setToast] = useState({
     open: false,
@@ -164,9 +247,13 @@ const AddProductModal = ({
 
     if (!allowedTypes.includes(file.type)) {
 
-      alert(
-        'Only JPG, PNG, WEBP or GIF images are allowed'
+      showToast(
+        'Only JPG, PNG, WEBP or GIF images are allowed',
+        'error'
       );
+      // alert(
+      //   'Only JPG, PNG, WEBP or GIF images are allowed'
+      // );
 
       return;
     }
@@ -177,9 +264,13 @@ const AddProductModal = ({
 
     if (file.size > maxSize) {
 
-      alert(
-        'Image size must be less than 5MB'
+      showToast(
+        'Image size must be less than 5MB',
+        'error'
       );
+      // alert(
+      //   'Image size must be less than 5MB'
+      // );
 
       return;
     }
@@ -225,6 +316,9 @@ const AddProductModal = ({
     );
   };
 
+  //  let imageUrl =
+  //     productData?.image || '';
+
   /* -------------------------------------------------------------------------- */
   /*                               RESET FORM                                   */
   /* -------------------------------------------------------------------------- */
@@ -248,47 +342,25 @@ const AddProductModal = ({
 
   const handleSubmit = async () => {
     try {
-
       setLoading(true);
-      
+
       /* ----------------------------- VALIDATIONS ----------------------------- */
 
       if (!product.name.trim()) {
-
         setLoading(false);
-
-        // alert('Product name is required');
-        showToast(
-          'Product name is required',
-          'warning'
-        );
-
+        showToast('Product name is required', 'warning');
         return;
       }
 
       if (!product.sku.trim()) {
-
         setLoading(false);
-
-        // alert('SKU is required');
-        showToast(
-          'SKU is required',
-          'warning'
-        );
-
+        showToast('SKU is required', 'warning');
         return;
       }
 
       if (!product.price) {
-
         setLoading(false);
-
-        // alert('Price is required');
-        showToast(
-          'Price is required',
-          'warning'
-        );
-
+        showToast('Price is required', 'warning');
         return;
       }
 
@@ -302,8 +374,10 @@ const AddProductModal = ({
       let imageUrl = '';
 
       if (imageFile) {
-
         try {
+
+          const oldImage =
+            productData?.image;
 
           imageUrl =
             await uploadProductImage(
@@ -311,9 +385,19 @@ const AddProductModal = ({
             );
 
           if (!imageUrl) {
-
             throw new Error(
               'Image upload failed'
+            );
+          }
+
+          // Delete old image only after successful upload
+          if (
+            mode === "edit" &&
+            oldImage &&
+            oldImage !== imageUrl
+          ) {
+            await deleteProductImage(
+              oldImage
             );
           }
 
@@ -324,140 +408,158 @@ const AddProductModal = ({
             uploadError
           );
 
-          // alert(
-          //   'Failed to upload product image'
-          // );
           showToast(
-            'Failed to upload image'
+            'Failed to upload image',
+            'error'
           );
+
+          setLoading(false);
 
           return;
         }
+      } else {
+        imageUrl = imagePreview || '';
       }
 
       /* ----------------------------- PRODUCT DATA ---------------------------- */
 
-      // Product object that will be stored in Firestore
-      const productData = {
+      // const productData = {
+      // const payload = {
+      //   // id: productData?.id,
+      //   name: product.name,
+      //   sku: product.sku,
+      //   category: selectedCategory,
+      //   description: product.description,
+      //   price: Number(product.price),
+      //   comparePrice: Number(product.comparePrice || 0),
+      //   stockQuantity: Number(product.stockQuantity),
+      //   lowStockThreshold: Number(product.lowStockThreshold),
+
+      //   shipping: {
+      //     weight: Number(product.weight || 0),
+      //     dimensions: {
+      //       length: Number(product.length || 0),
+      //       width: Number(product.width || 0),
+      //       height: Number(product.height || 0),
+      //     },
+      //   },
+
+      //   tags,
+      //   image: imageUrl,
+      //   featured: product.featured,
+      //   publish: product.publish,
+      //   trackInventory: product.trackInventory,
+
+      //   status:
+      //     Number(product.stockQuantity) > 0
+      //       ? 'In Stock'
+      //       : 'Out of Stock',
+      // };
+
+      const payload = {
+        ...(mode === "edit" && {
+          id: productData?.id,
+        }),
 
         name: product.name,
-
         sku: product.sku,
-
-        // category: product.category,
         category: selectedCategory,
-
         description: product.description,
-
-        // Pricing
         price: Number(product.price),
+        comparePrice: Number(product.comparePrice || 0),
+        stockQuantity: Number(product.stockQuantity),
+        lowStockThreshold: Number(product.lowStockThreshold),
 
-        comparePrice: Number(
-          product.comparePrice || 0
-        ),
-
-        // Inventory
-        stockQuantity: Number(
-          product.stockQuantity
-        ),
-
-        lowStockThreshold: Number(
-          product.lowStockThreshold
-        ),
-
-        // Shipping
         shipping: {
           weight: Number(product.weight || 0),
-
           dimensions: {
-            length: Number(
-              product.length || 0
-            ),
-
-            width: Number(
-              product.width || 0
-            ),
-
-            height: Number(
-              product.height || 0
-            ),
+            length: Number(product.length || 0),
+            width: Number(product.width || 0),
+            height: Number(product.height || 0),
           },
         },
 
-        // Tags
         tags,
-
-        // Product image
         image: imageUrl,
-
-        // Product flags
         featured: product.featured,
-
         publish: product.publish,
+        trackInventory: product.trackInventory,
 
-        trackInventory:
-          product.trackInventory,
-
-        // Product status
         status:
           Number(product.stockQuantity) > 0
-            ? 'In Stock'
-            : 'Out of Stock',
+            ? "In Stock"
+            : "Out of Stock",
       };
 
-      /* ---------------------------- SAVE TO FIREBASE ---------------------------- */
+      /* ---------------------------- CALL PARENT HANDLER ---------------------------- */
 
-      // Save product to Firestore
-      const response =
-        await createProduct(productData);
+      // await onSubmit(productData);
 
-      /* ---------------------------- OPTIONAL LOCAL UPDATE ---------------------------- */
+      // await onSubmit({
+      //   id: payload?.id,
+      //   ...productData,
+      // });
 
-      // Update local UI immediately
-      if (onAddProduct) {
+      // await onSubmit(payload);
 
-        onAddProduct({
-          id: response.id,
-          ...productData,
-        });
+      console.log("SUBMIT PAYLOAD:", payload);
+
+      if (typeof onSubmit === "function") {
+        const result = await onSubmit(payload);
+
+        console.log("SUBMIT RESULT:", result);
       }
+
+
+
+
+
+
+      console.log("ONSUBMIT:", onSubmit);
+console.log("MODE:", mode);
+
+
+
+
+
+
+      // if (typeof onSubmit === "function") {
+      //   await onSubmit(payload);
+      // }
 
       /* ----------------------------- SUCCESS ----------------------------- */
 
       showToast(
-        'Product added successfully',
+        mode === 'edit'
+          ? 'Product updated successfully'
+          : 'Product added successfully',
         'success'
       );
-      // alert(
-      //   'Product added successfully'
-      // );
 
-      /* ----------------------------- RESET FORM ----------------------------- */
+      /* ----------------------------- RESET + CLOSE ----------------------------- */
 
       resetForm();
-
       onClose();
 
     } catch (error) {
+      console.log('SUBMIT ERROR:', error);
 
-      console.log(
-        'ADD PRODUCT ERROR:',
-        error
-      );
-
-      showToast(
-        'Failed to add product',
-        'error'
-      );
-      // alert(
-      //   'Failed to add product'
-      // );
-
+      showToast('Something went wrong', 'error');
     } finally {
-
       setLoading(false);
     }
   };
+
+
+
+  console.log(
+  "PRODUCT FORM PROPS",
+  {
+    mode,
+    onSubmit
+  }
+);
+
 
   return (
     <Dialog
@@ -498,7 +600,12 @@ const AddProductModal = ({
                 color: '#111827',
               }}
             >
-              Add New Product
+              {/* Add New Product */}
+              {
+                mode === "edit"
+                  ? "Edit Product"
+                  : "Add New Product"
+              }
             </Typography>
 
             <Typography
@@ -508,7 +615,12 @@ const AddProductModal = ({
                 color: '#6B7280',
               }}
             >
-              Add a new product to your inventory
+              {/* Add a new product to your inventory */}
+              {
+                mode === "edit"
+                  ? "Update product information"
+                  : "Add a new product to your inventory"
+              }
             </Typography>
           </Box>
 
@@ -1015,7 +1127,10 @@ const AddProductModal = ({
               sx={{ color: '#fff' }}
             />
           ) : (
-            'Add Product'
+            // 'Add Product'
+            mode === "edit"
+              ? "Update Product"
+              : "Add Product"
           )}
         </Button>
       </Box>
@@ -1052,7 +1167,7 @@ const AddProductModal = ({
   );
 };
 
-export default AddProductModal;
+export default ProductFormModal;
 
 
 /* -------------------------------- Components -------------------------------- */
