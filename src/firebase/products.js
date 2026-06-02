@@ -17,25 +17,6 @@ const productsRef = collection(
 );
 
 
-// // CREATE PRODUCT
-// export const createProduct =
-//   async (productData) => {
-
-//     const data = {
-//       ...productData,
-
-//       createdAt: serverTimestamp(),
-
-//       updatedAt: serverTimestamp()
-//     };
-
-//     return await addDoc(
-//       productsRef,
-//       data
-//     );
-// };
-
-
 export const createProduct = async (
   productData
 ) => {
@@ -114,10 +95,14 @@ export const updateProduct = async (
       productId
     );
 
-    await updateDoc(
-      productRef,
-      productData
-    );
+    // await updateDoc(
+    //   productRef,
+    //   productData
+    // );
+    await updateDoc(productRef, {
+      ...productData,
+      updatedAt: serverTimestamp(),
+    });
 
     return true;
   } catch (error) {
