@@ -14,6 +14,8 @@ import ProductsHeader from "../components/products/ProductsHeader";
 import ProductFormModal from "../components/products/ProductFormModal";
 import ViewProductModal from "../components/products/ViewProductModal";
 import { deleteProductImage } from "../../services/uploadImage";
+import ConfirmDialog from "../components/common/ConfirmDialog";
+import AppToast from "../components/common/AppToast";
 // import EditProductModal from "../components/products/EditProductModal";
 
 
@@ -68,6 +70,18 @@ export default function ProductsPage() {
     setOpenEditModal,
   ] = useState(false);
 
+  const [confirmOpen, setConfirmOpen] =
+    useState(false);
+
+  const [productToDelete, setProductToDelete] =
+    useState(null);
+  
+  const [toast, setToast] = useState({
+    open: false,
+    severity: "success",
+    message: "",
+  });
+
 
 
   /* -------------------------------------------------------------------------- */
@@ -84,19 +98,19 @@ export default function ProductsPage() {
       const data =
         await getProducts();
 
-      console.log(
-        "FIREBASE PRODUCTS:",
-        data
-      );
+      // console.log(
+      //   "FIREBASE PRODUCTS:",
+      //   data
+      // );
 
       setProducts(data);
 
     } catch (error) {
 
-      console.log(
-        "FETCH PRODUCTS ERROR:",
-        error
-      );
+      // console.log(
+      //   "FETCH PRODUCTS ERROR:",
+      //   error
+      // );
 
     } finally {
 
@@ -114,6 +128,19 @@ export default function ProductsPage() {
     fetchProducts();
 
   }, []);
+
+
+  /* Toast Helper ---*/
+  const showToast = (
+    message,
+    severity = "success"
+  ) => {
+    setToast({
+      open: true,
+      message,
+      severity,
+    });
+  };
 
   /* -------------------------------------------------------------------------- */
   /*                               ADD PRODUCT                                  */
@@ -134,23 +161,35 @@ export default function ProductsPage() {
     setOpenEditModal(true);
   };
 
-  // const handleCreateProduct = async (
-  //   productData
-  // ) => {
-  //   try {
+  const handleCreateProduct = async (productData) => {
+    try {
+      const response = await createProduct(productData);
 
-  //     console.log(
-  //       "CREATING PRODUCT:",
-  //       productData
-  //     );
+      setProducts((prev) => [
+        {
+          id: response.id,
+          ...productData,
+        },
+        ...prev,
+      ]);
 
+      showToast(
+        "Product created successfully",
+        "success"
+      );
+    } catch (error) {
+      showToast(
+        "Failed to create product",
+        "error"
+      );
+    }
+  };
+
+
+  // const handleCreateProduct =
+  //   async (productData) => {
   //     const response =
   //       await createProduct(productData);
-
-  //     console.log(
-  //       "FIRESTORE RESPONSE:",
-  //       response
-  //     );
 
   //     setProducts(prev => [
   //       {
@@ -159,33 +198,8 @@ export default function ProductsPage() {
   //       },
   //       ...prev,
   //     ]);
+  //   };
 
-  //     return response;
-
-  //   } catch (error) {
-
-  //     console.error(
-  //       "CREATE PRODUCT ERROR:",
-  //       error
-  //     );
-
-  //     throw error;
-  //   }
-  // };
-
-  const handleCreateProduct =
-    async (productData) => {
-      const response =
-        await createProduct(productData);
-
-      setProducts(prev => [
-        {
-          id: response.id,
-          ...productData,
-        },
-        ...prev,
-      ]);
-    };
 
   const handleUpdateProduct = async (productData) => {
     try {
@@ -198,73 +212,132 @@ export default function ProductsPage() {
             : item
         )
       );
+
+      showToast(
+        "Product updated successfully",
+        "success"
+      );
     } catch (error) {
-      console.log("UPDATE ERROR:", error);
+      showToast(
+        "Failed to update product",
+        "error"
+      );
     }
   };
 
-  const handleDeleteProduct = async (
-    product
-  ) => {
+  
+  // const handleUpdateProduct = async (productData) => {
+  //   try {
+  //     await updateProduct(productData.id, productData);
 
-    const confirmDelete =
-      window.confirm(
-        "Delete this product?"
+  //     setProducts((prev) =>
+  //       prev.map((item) =>
+  //         item.id === productData.id
+  //           ? productData
+  //           : item
+  //       )
+  //     );
+  //   } catch (error) {
+  //     // console.log("UPDATE ERROR:", error);
+  //   }
+  // };
+
+
+
+
+  const handleDeleteClick = (product) => {
+  setProductToDelete(product);
+  setConfirmOpen(true);
+};
+
+
+const confirmDeleteProduct =
+  async () => {
+    if (!productToDelete) return;
+
+    // Delete image first
+    if (productToDelete.image) {
+      await deleteProductImage(
+        productToDelete.image
       );
-
-    if (!confirmDelete) return;
+    }
 
     try {
-
-      // Delete image first
-      if (product.image) {
-        await deleteProductImage(
-          product.image
-        );
-      }
-
       const success =
-        await deleteProduct(product.id);
+        await deleteProduct(
+          productToDelete.id
+        );
 
       if (success) {
-
         setProducts((prev) =>
           prev.filter(
             (item) =>
-              item.id !== product.id
+              item.id !==
+              productToDelete.id
           )
         );
+
+        showToast(
+          "Product deleted successfully",
+          "success"
+        );
       }
-
     } catch (error) {
-
-      console.log(
-        "DELETE PRODUCT ERROR:",
-        error
+      showToast(
+        "Failed to delete product",
+        "error"
       );
+    } finally {
+      setConfirmOpen(false);
+      setProductToDelete(null);
     }
   };
 
-  // const handleDeleteProduct =
-  //   async (productId) => {
-  //     const confirmDelete =
-  //       window.confirm(
-  //         "Delete this product?"
-  //       );
 
-  //     if (!confirmDelete) return;
+
+
+  // const handleDeleteProduct = async (
+  //   product
+  // ) => {
+
+  //   const confirmDelete =
+  //     window.confirm(
+  //       "Delete this product?"
+  //     );
+
+  //   if (!confirmDelete) return;
+
+  //   try {
+
+  //     // Delete image first
+  //     if (product.image) {
+  //       await deleteProductImage(
+  //         product.image
+  //       );
+  //     }
+
   //     const success =
-  //       await deleteProduct(productId);
+  //       await deleteProduct(product.id);
 
   //     if (success) {
+
   //       setProducts((prev) =>
   //         prev.filter(
   //           (item) =>
-  //             item.id !== productId
+  //             item.id !== product.id
   //         )
   //       );
   //     }
-  //   };
+
+  //   } catch (error) {
+
+  //     console.log(
+  //       "DELETE PRODUCT ERROR:",
+  //       error
+  //     );
+  //   }
+  // };
+
 
   /* -------------------------------------------------------------------------- */
   /*                              FILTER PRODUCTS                               */
@@ -325,29 +398,12 @@ export default function ProductsPage() {
   /*                                  LOADING                                   */
   /* -------------------------------------------------------------------------- */
 
-  if (loading) {
-
-    return (
-
-      <Box
-        sx={{
-          minHeight: "60vh",
-
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
 
 
-  console.log(
-  "HANDLE CREATE:",
-  handleCreateProduct
-);
+//   console.log(
+//   "HANDLE CREATE:",
+//   handleCreateProduct
+// );
 
   return (
     <Box p={1}>
@@ -411,30 +467,44 @@ export default function ProductsPage() {
       {/* -------------------------------------------------------------------------- */}
       {/*                                EMPTY STATE                                 */}
       {/* -------------------------------------------------------------------------- */}
+      
 
-      {!loading &&
-        filteredProducts.length === 0 && (
+      {/* PRODUCT CONTENT */}
+
+      {loading ? (
         <Box
           sx={{
-            py: 10,
-            textAlign: "center",
+            minHeight: "400px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <Typography
-            variant="h5"
-            fontWeight={700}
-            mb={1}
-          >
-            No Products Found
-          </Typography>
-
-          <Typography
-            color="text.secondary"
-          >
-            {category} products added in store will appear here.
-          </Typography>
+          <CircularProgress />
         </Box>
-      )}
+      ) : (
+        <>
+          {/* EMPTY STATE */}
+          {filteredProducts.length === 0 && (
+            <Box
+              sx={{
+                py: 10,
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                variant="h5"
+                fontWeight={700}
+                mb={1}
+              >
+                No Products Found
+              </Typography>
+
+              <Typography color="text.secondary">
+                {category} products added in store will appear here.
+              </Typography>
+            </Box>
+          )}
 
       {/* -------------------------------------------------------------------------- */}
       {/*                                 GRID VIEW                                  */}
@@ -459,8 +529,11 @@ export default function ProductsPage() {
                     handleViewProduct(product)
                   }
                   onDelete={() =>
-                    handleDeleteProduct(product)
-                  }
+  handleDeleteClick(product)
+}
+                  // onDelete={() =>
+                  //   handleDeleteProduct(product)
+                  // }
                   onEdit={() =>
                     handleEditProduct(product)
                   }
@@ -483,9 +556,14 @@ export default function ProductsPage() {
           <ProductListTable
             products={filteredProducts}
             onView={handleViewProduct}
-            onDelete={handleDeleteProduct}
+            onDelete={
+  handleDeleteClick
+}
+            // onDelete={handleDeleteProduct}
             onEdit={handleEditProduct}
           />
+        )}
+        </>
       )}
 
       {/* -------------------------------------------------------------------------- */}
@@ -523,6 +601,30 @@ export default function ProductsPage() {
         }
       />
 
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Delete Product"
+        message={`Are you sure you want to delete "${productToDelete?.name}"?`}
+        onClose={() => {
+          setConfirmOpen(false);
+          setProductToDelete(null);
+        }}
+        onConfirm={
+          confirmDeleteProduct
+        }
+      />
+
+      <AppToast
+  open={toast.open}
+  severity={toast.severity}
+  message={toast.message}
+  onClose={() =>
+    setToast((prev) => ({
+      ...prev,
+      open: false,
+    }))
+  }
+/>
     </Box>
   );
 }

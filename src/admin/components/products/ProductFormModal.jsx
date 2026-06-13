@@ -71,21 +71,6 @@ const ProductFormModal = ({
   productData = null,
   onSubmit,
 }) => {
-// const ProductFormModal = ({
-//   open,
-//   onClose,
-//   onAddProduct,
-// }) => {
-
-// console.log("PRODUCT FORM PROPS", {
-//   mode,
-//   onSubmit,
-//   open,
-// });
-//   console.log("PRODUCT FORM PROPS", {
-//   mode,
-//   onSubmit,
-// });
 
   useEffect(() => {
     const fetchCategories =
@@ -126,42 +111,6 @@ const ProductFormModal = ({
       resetForm();
     }
   }, [mode, productData]);
-
-  // useEffect(() => {
-  //   if (mode === "edit" && productData) {
-  //     setProduct({
-  //       ...productData,
-
-  //       // category: JSON.stringify(
-  //       //   productData.category || ""
-  //       // ),
-  //       category: productData.category
-  //         ? JSON.stringify(productData.category)
-  //         : "",
-
-  //       weight:
-  //         productData.shipping?.weight || "",
-
-  //       length:
-  //         productData.shipping?.dimensions
-  //           ?.length || "",
-
-  //       width:
-  //         productData.shipping?.dimensions
-  //           ?.width || "",
-
-  //       height:
-  //         productData.shipping?.dimensions
-  //           ?.height || "",
-  //     });
-
-  //     setTags(productData.tags || []);
-
-  //     setImagePreview(
-  //       productData.image || ""
-  //     );
-  //   }
-  // }, [mode, productData]);
 
   const [toast, setToast] = useState({
     open: false,
@@ -263,7 +212,6 @@ const ProductFormModal = ({
     const maxSize = 5 * 1024 * 1024;
 
     if (file.size > maxSize) {
-
       showToast(
         'Image size must be less than 5MB',
         'error'
@@ -292,7 +240,6 @@ const ProductFormModal = ({
   /* -------------------------------------------------------------------------- */
 
   const handleAddTag = () => {
-
     const trimmedTag = tag.trim();
 
     if (
@@ -423,39 +370,6 @@ const ProductFormModal = ({
 
       /* ----------------------------- PRODUCT DATA ---------------------------- */
 
-      // const productData = {
-      // const payload = {
-      //   // id: productData?.id,
-      //   name: product.name,
-      //   sku: product.sku,
-      //   category: selectedCategory,
-      //   description: product.description,
-      //   price: Number(product.price),
-      //   comparePrice: Number(product.comparePrice || 0),
-      //   stockQuantity: Number(product.stockQuantity),
-      //   lowStockThreshold: Number(product.lowStockThreshold),
-
-      //   shipping: {
-      //     weight: Number(product.weight || 0),
-      //     dimensions: {
-      //       length: Number(product.length || 0),
-      //       width: Number(product.width || 0),
-      //       height: Number(product.height || 0),
-      //     },
-      //   },
-
-      //   tags,
-      //   image: imageUrl,
-      //   featured: product.featured,
-      //   publish: product.publish,
-      //   trackInventory: product.trackInventory,
-
-      //   status:
-      //     Number(product.stockQuantity) > 0
-      //       ? 'In Stock'
-      //       : 'Out of Stock',
-      // };
-
       const payload = {
         ...(mode === "edit" && {
           id: productData?.id,
@@ -493,31 +407,12 @@ const ProductFormModal = ({
 
       /* ---------------------------- CALL PARENT HANDLER ---------------------------- */
 
-      // await onSubmit(productData);
-
-      // await onSubmit({
-      //   id: payload?.id,
-      //   ...productData,
-      // });
-
-      // await onSubmit(payload);
-
-      console.log("SUBMIT PAYLOAD:", payload);
 
       if (typeof onSubmit === "function") {
         const result = await onSubmit(payload);
 
         console.log("SUBMIT RESULT:", result);
       }
-
-
-
-
-
-
-      console.log("ONSUBMIT:", onSubmit);
-console.log("MODE:", mode);
-
 
 
 
@@ -542,7 +437,7 @@ console.log("MODE:", mode);
       onClose();
 
     } catch (error) {
-      console.log('SUBMIT ERROR:', error);
+      // console.log('SUBMIT ERROR:', error);
 
       showToast('Something went wrong', 'error');
     } finally {
@@ -552,13 +447,13 @@ console.log("MODE:", mode);
 
 
 
-  console.log(
-  "PRODUCT FORM PROPS",
-  {
-    mode,
-    onSubmit
-  }
-);
+//   console.log(
+//   "PRODUCT FORM PROPS",
+//   {
+//     mode,
+//     onSubmit
+//   }
+// );
 
 
   return (

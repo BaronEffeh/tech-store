@@ -9,8 +9,9 @@ import {
   Stack,
 } from "@mui/material";
 
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+// import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+// import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+// import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
 import LaptopMacIcon from "@mui/icons-material/LaptopMac";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
@@ -104,6 +105,7 @@ export default function ProductCard({
   product,
   onView,
   onEdit,
+  onDelete,
 }) {
 
   return (
@@ -350,9 +352,9 @@ export default function ProductCard({
           <Button
             fullWidth
             variant="outlined"
-            startIcon={
-              <VisibilityOutlinedIcon />
-            }
+            // startIcon={
+            //   <VisibilityOutlinedIcon />
+            // }
             onClick={() =>
               onView?.(product)
             }
@@ -369,9 +371,9 @@ export default function ProductCard({
           <Button
             fullWidth
             variant="contained"
-            startIcon={
-              <EditOutlinedIcon />
-            }
+            // startIcon={
+            //   <EditOutlinedIcon />
+            // }
             onClick={() =>
               onEdit?.(product)
             }
@@ -387,6 +389,31 @@ export default function ProductCard({
             }}
           >
             Edit
+          </Button>
+
+          <Button
+            fullWidth
+            variant="contained"
+            // startIcon={
+            //   <DeleteOutlinedIcon
+            //     fontSize="small"
+            //   />
+            // }
+            onClick={() =>
+              onDelete?.(product)
+            }
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+
+              bgcolor: "#6e0705",
+
+              "&:hover": {
+                bgcolor: "#991c1a",
+              },
+            }}
+          >
+            Delete
           </Button>
 
         </Box>
