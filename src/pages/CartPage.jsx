@@ -87,7 +87,7 @@ export default function CartPage() {
                   </Typography>
 
                   <Typography color="primary" fontWeight="bold">
-                    ₦{item.price}
+                    ₦{Number(item.price || 0).toLocaleString()}
                   </Typography>
 
                   {/* Quantity Controls */}
@@ -181,7 +181,12 @@ export default function CartPage() {
                 disabled={cart.length === 0}
                 onClick={() => {
                   if (!user) {
-                    navigate("/auth");
+                    // navigate("/auth");
+                    navigate("/auth", {
+                      state: {
+                        from: "/checkout",
+                      },
+                    });
                   } else {
                     navigate("/checkout");
                   }
@@ -189,25 +194,6 @@ export default function CartPage() {
               >
                 Proceed to Checkout
               </Button>
-
-              {/* <Button
-                fullWidth
-                variant="contained"
-                size="large"
-                disabled={cart.length === 0}
-                onClick={() => navigate("/checkout")}
-              >
-                Proceed to Checkout
-              </Button> */}
-
-              {/* <Button
-                fullWidth
-                variant="contained"
-                size="large"
-                disabled={cart.length === 0}
-              >
-                Proceed to Checkout
-              </Button> */}
             </Paper>
           </Grid>
         </Grid>
@@ -217,97 +203,3 @@ export default function CartPage() {
 }
 
 
-
-
-
-
-// import React from "react";
-// import {
-//   Container,
-//   Typography,
-//   Box,
-//   Button,
-//   Grid,
-//   IconButton
-// } from "@mui/material";
-// import { useCart } from "../context/CartContext";
-// import DeleteIcon from "@mui/icons-material/Delete";
-
-// export default function CartPage() {
-//   const { cart, addToCart, removeFromCart, decreaseQty } = useCart();
-
-//   const totalPrice = cart.reduce(
-//     (sum, item) => sum + item.price * item.quantity,
-//     0
-//   );
-
-//   return (
-//     <Container sx={{ py: 4 }}>
-//       <Typography variant="h5" fontWeight="bold" gutterBottom>
-//         Shopping Cart
-//       </Typography>
-
-//       {cart.length === 0 ? (
-//         <Typography>Your cart is empty.</Typography>
-//       ) : (
-//         <>
-//           {cart.map((item) => (
-//             <Grid
-//               container
-//               spacing={2}
-//               key={item.id}
-//               sx={{
-//                 mb: 2,
-//                 p: 2,
-//                 border: "1px solid #eee",
-//                 borderRadius: 2
-//               }}
-//             >
-//               {/* Image */}
-//               <Grid item xs={3}>
-//                 <Box
-//                   component="img"
-//                   src={item.image}
-//                   sx={{ width: "100%", borderRadius: 2 }}
-//                 />
-//               </Grid>
-
-//               {/* Info */}
-//               <Grid item xs={6}>
-//                 <Typography fontWeight="bold">{item.name}</Typography>
-//                 <Typography color="text.secondary">
-//                   ₦{item.price}
-//                 </Typography>
-
-//                 {/* Quantity */}
-//                 <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-//                   <Button onClick={() => decreaseQty(item.id)}>-</Button>
-//                   <Typography>{item.quantity}</Typography>
-//                   <Button onClick={() => addToCart(item)}>+</Button>
-//                 </Box>
-//               </Grid>
-
-//               {/* Actions */}
-//               <Grid item xs={3}>
-//                 <IconButton onClick={() => removeFromCart(item.id)}>
-//                   <DeleteIcon />
-//                 </IconButton>
-//               </Grid>
-//             </Grid>
-//           ))}
-
-//           {/* Total */}
-//           <Box sx={{ mt: 3, textAlign: "right" }}>
-//             <Typography variant="h6">
-//               Total: ₦{totalPrice.toFixed(2)}
-//             </Typography>
-
-//             <Button variant="contained" sx={{ mt: 2 }}>
-//               Checkout
-//             </Button>
-//           </Box>
-//         </>
-//       )}
-//     </Container>
-//   );
-// }

@@ -30,19 +30,28 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
 
   const categories = [
     "All Products",
-    "Laptops",
-    "Phones",
-    "Tablets",
-    "Accessories",
-    "Wearables"
+    ...new Set(
+      products
+        .map((product) => product.category?.name)
+        .filter(Boolean)
+    ),
   ];
+
+  // const categories = [
+  //   "All Products",
+  //   "Laptops",
+  //   "Phones",
+  //   "Tablets",
+  //   "Accessories",
+  //   "Wearables"
+  // ];
 
   const filteredProducts = products
   // 1. Category filter
   .filter((product) =>
     selectedCategory === "All Products"
       ? true
-      : product.category === selectedCategory
+      : product.category?.name === selectedCategory
   )
 
   // 2. Search filter
@@ -55,13 +64,21 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
     const specsString = product.specs
       ? Object.values(product.specs).join(" ").toLowerCase()
       : "";
-
+    
     const searchableText = `
-      ${product.name}
-      ${product.category}
+      ${product.name || ""}
+      ${product.category?.name || ""}
+      ${product.category?.slug || ""}
       ${product.tag || ""}
       ${specsString}
     `.toLowerCase();
+
+    // const searchableText = `
+    //   ${product.name}
+    //   ${product.category?.name}
+    //   ${product.tag || ""}
+    //   ${specsString}
+    // `.toLowerCase();
 
     let matchCount = 0;
 
@@ -79,7 +96,7 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
 
     return selectedCategory === "All Products"
       ? true
-      : product.category === selectedCategory;
+      : product.category?.name === selectedCategory;
   })
 
   // 3. Sorting
@@ -250,21 +267,23 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                 {/* Price */}
                 <Box sx={{ mb: 2 }}>
                   <Typography color="primary" fontWeight="bold">
-                    &#x20A6;{product.price}
+                    ₦{Number(product.price || 0).toLocaleString()}
+                    {/* &#x20A6;{product.price} */}
                   </Typography>
-                  {product.oldPrice && (
+                  {product.comparePrice && (
                     <Typography
                       variant="body2"
                       sx={{ textDecoration: "line-through" }}
                       color="text.secondary"
                     >
-                      &#x20A6;{product.oldPrice}
+                      ₦{Number(product.comparePrice).toLocaleString()}
+                      {/* &#x20A6;{product.oldPrice} */}
                     </Typography>
                   )}
                 </Box>
 
                 {/* Button */}
-                <Button
+                {/* <Button
                   fullWidth
                   variant="contained"
                   onClick={(e) => {
@@ -273,6 +292,20 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                   }}
                 >
                   Add to Cart
+                </Button> */}
+
+                <Button
+                  fullWidth
+                  variant="contained"
+                  disabled={product.status === "Out of Stock"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(product);
+                  }}
+                >
+                  {product.status === "Out of Stock"
+                    ? "Out of Stock"
+                    : "Add to Cart"}
                 </Button>
                 </Box>
               </Paper>

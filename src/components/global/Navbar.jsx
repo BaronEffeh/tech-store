@@ -12,9 +12,11 @@ import {
 import { ShoppingCart, AccountCircle, Search } from "@mui/icons-material";
 import { useCart } from "../../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export function Navbar() {
   const { totalItems } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -90,9 +92,15 @@ export function Navbar() {
             <InputBase placeholder="Search products..." />
           </Box>
 
-          <IconButton>
+          <IconButton
+            onClick={() => navigate(user ? "/account" : "/auth")}
+          >
             <AccountCircle />
           </IconButton>
+
+          {/* <IconButton>
+            <AccountCircle />
+          </IconButton> */}
 
           {/* CART BADGE */}
           <IconButton onClick={() => navigate("/cart")}>

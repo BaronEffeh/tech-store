@@ -12,6 +12,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AuthPage from "./pages/AuthPage";
+import AccountPage from "./pages/AccountPage";
 
 import ContactPage from "./pages/support/ContactPage";
 import FAQPage from "./pages/support/FAQPage";
@@ -52,6 +53,7 @@ function App() {
                   />
                   {/* <Route path="/checkout" element={<CheckoutPage />} /> */}
                   <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/account" element={<AccountPage />} />
 
                   {/* SUPPORT */}
                   <Route path="/support/contact" element={<ContactPage />} />

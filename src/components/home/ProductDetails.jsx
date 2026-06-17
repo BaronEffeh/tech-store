@@ -174,27 +174,38 @@ export default function ProductDetails({ open, onClose, product, onAdd }) {
             <Rating value={product.rating} readOnly />
 
             <Typography color="primary" fontWeight="bold" sx={{ mt: 1 }}>
-              ₦{product.price}
+              ₦{Number(product.price || 0).toLocaleString()}
             </Typography>
 
-            {product.oldPrice && (
+            {product.comparePrice && (
               <Typography color="text.secondary" sx={{ textDecoration: "line-through" }}>
-                ₦{product.oldPrice}
+                ₦{Number(product.comparePrice).toLocaleString()}
               </Typography>
             )}
 
             {/* Stock */}
             <Typography
+            bgcolor={product.status === "Out of Stock"
+              ? "#FEE2E2"
+              : "#d4f5e6"
+            }
+            color={product.status === "Out of Stock"
+              ? "#DC2626"
+              : ""
+            }
               sx={{
                 mt: 2,
-                bgcolor: "#d4f5e6",
+                // bgcolor: "#d4f5e6",
                 px: 2,
                 py: 1,
                 borderRadius: 2,
                 display: "inline-block"
               }}
             >
-              In Stock
+              {product.status === "Out of Stock"
+                ? "Out of Stock"
+                : "In Stock"}
+              {/* In Stock */}
             </Typography>
 
             {/* Quantity */}
@@ -213,9 +224,16 @@ export default function ProductDetails({ open, onClose, product, onAdd }) {
             <Button
               fullWidth
               variant="contained"
+              disabled={product.status === "Out of Stock"}
               sx={{ mt: 3 }}
-              onClick={() => onAdd({ ...product, quantity: qty })}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAdd({ ...product, quantity: qty })
+              }}
             >
+              {product.status === "Out of Stock"
+                ? "Out of Stock"
+                : "Add to Cart"}
               Add to Cart
             </Button>
 
