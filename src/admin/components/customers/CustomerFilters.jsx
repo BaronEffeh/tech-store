@@ -46,7 +46,7 @@ export default function CustomerFilters({
 
         <InputBase
           fullWidth
-          placeholder="Search by name, email, or customer ID..."
+          placeholder="Search by name, email, phone, or customer ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />

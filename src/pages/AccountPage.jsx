@@ -155,17 +155,45 @@ export default function AccountPage() {
                       Order #{order.id.slice(0, 6)}
                     </Typography>
 
-                    <Chip
-                      label={order.status || "Pending"}
-                      color={
-                        order.status === "Delivered"
-                          ? "success"
-                          : order.status === "Cancelled"
-                          ? "error"
-                          : "warning"
-                      }
-                      size="small"
-                    />
+                    <Box>                                          
+                      <Box
+                        sx={{
+                          display: "flex",
+                          mb: 1                        
+                        }}
+                      >
+                        <Typography>
+                          Order Satus:
+                        </Typography> 
+                        <Chip
+                          label={order.status || "Pending"}
+                          color={
+                            order.status === "Delivered"
+                              ? "success"
+                              : order.status === "Cancelled"
+                              ? "error"
+                              : "warning"
+                          }
+                          size="small"
+                        />
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                        }}>
+                        <Typography>Payment Status</Typography>
+                        <Chip 
+                          label={order.paymentStatus || "Pending"}
+                          color={
+                            order.status === "Paid"
+                            ? "success"
+                            : "warning"
+                          }
+                          size="small"
+                        />
+                      </Box>
+                    </Box>
+                    {/* </Typography> */}
                   </Box>
 
                   <Typography variant="body2" mt={1}>

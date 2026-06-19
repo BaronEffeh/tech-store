@@ -476,11 +476,13 @@ const confirmDeleteProduct =
           sx={{
             minHeight: "400px",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            justifyContent: "center",
+            // justifyContent: "center",
           }}
         >
           <CircularProgress />
+          <Typography>Loading products...</Typography>
         </Box>
       ) : (
         <>

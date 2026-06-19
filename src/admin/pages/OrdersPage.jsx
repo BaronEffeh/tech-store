@@ -1,28 +1,57 @@
-import React, { useMemo, useState } from "react";
-import { Box } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { getOrders } from "../../firebase/adminOrders";
 
 import OrdersHeader from "../components/orders/OrdersHeader";
 import OrderStats from "../components/orders/OrderStats";
 import OrderFilters from "../components/orders/OrderFilters";
 import OrderList from "../components/orders/OrderList";
 
-import { mockOrders } from "../data/mockOrders";
+// import { getOrders } from "../../firebase/orders";
 
 export default function OrdersPage() {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [filters, setFilters] = useState({
     query: "",
     status: "All",
     payment: "All",
   });
 
-  const filteredOrders = useMemo(() => {
-    return mockOrders.filter((order) => {
-      const searchText = filters.query.toLowerCase();
+  useEffect(() => {
+    async function loadOrders() {
+      try {
+        const data = await getOrders();
+        setOrders(data);
+      } catch (err) {
+        console.error("Failed to load order:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-      const matchesQuery =
-        order.id.toLowerCase().includes(searchText) ||
-        order.customer.toLowerCase().includes(searchText) ||
-        order.email.toLowerCase().includes(searchText);
+    loadOrders();
+  }, []);
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const search = filters.query.toLowerCase();
+
+      // const matchesQuery =
+      //   (order.id || "").toLowerCase().includes(search) ||
+      //   (order.customer?.name || "").toLowerCase().includes(search) ||
+      //   (order.customer?.email || "").toLowerCase().includes(search);
+      const matchesQuery = [
+        order.id,
+        order.customer?.name,
+        order.customer?.email,
+        order.customer?.phone,
+      ]
+        .filter(Boolean)
+        .some((value) =>
+          String(value).toLowerCase().includes(search)
+        );
 
       const matchesStatus =
         filters.status === "All" ||
@@ -38,7 +67,7 @@ export default function OrdersPage() {
         matchesPayment
       );
     });
-  }, [filters]);
+  }, [orders, filters]);
 
   return (
     <Box>
@@ -51,32 +80,23 @@ export default function OrdersPage() {
         setFilters={setFilters}
       />
 
-      <OrderList orders={filteredOrders} />
+      {loading ? (
+        <Box
+          sx={{
+            minHeight: "400px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <CircularProgress />
+          <Typography>Loading orders...</Typography>
+        </Box>
+      ) : (
+        <>
+        <OrderList orders={filteredOrders} />
+        </>
+      )}      
     </Box>
   );
 }
-
-
-
-
-
-// import React from "react";
-// import { Box } from "@mui/material";
-// import OrdersHeader from "../components/orders/OrdersHeader";
-// import OrderStats from "../components/orders/OrderStats";
-// import OrderFilters from "../components/orders/OrderFilters";
-// import OrderList from "../components/orders/OrderList";
-
-// export default function OrdersPage() {
-//     return (
-//         <Box>
-//             <OrdersHeader />
-
-//             <OrderStats />
-
-//             <OrderFilters />
-
-//             <OrderList />
-//         </Box>
-//     )
-// }

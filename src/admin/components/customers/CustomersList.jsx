@@ -75,15 +75,16 @@ export default function CustomersList({ customers }) {
                     gap: 2
                   }}
                 >
-                  <Avatar
+
+                  <Avatar src={customer.photoURL || ""}
                     sx={{
                       width: 48,
                       height: 48,
                       fontSize: "1.5rem",
-                      bgcolor: "#f1f5f9"
                     }}
                   >
-                    {customer.avatar}
+                    {!customer.photoURL &&
+                      customer.displayName?.charAt(0)?.toUpperCase()}
                   </Avatar>
 
                   <Box>
@@ -96,7 +97,7 @@ export default function CustomersList({ customers }) {
                       }}
                     >
                       <Typography fontWeight="bold">
-                        {customer.name}
+                        {customer.displayName}
                       </Typography>
 
                       {/* STATUS */}
@@ -144,35 +145,6 @@ export default function CustomersList({ customers }) {
                           }}
                         />
                       )}
-
-                      {/* {customer.status === "VIP" ? (
-                        <>
-                          <Chip
-                            label="VIP"
-                            size="small"
-                            sx={{
-                              bgcolor: "#f3e8ff",
-                              color: "#9333ea"
-                            }}
-                          />
-
-                          <WorkspacePremiumIcon
-                            sx={{
-                              fontSize: 18,
-                              color: "#9333ea"
-                            }}
-                          />
-                        </>
-                      ) : (
-                        <Chip
-                          label="Active"
-                          size="small"
-                          sx={{
-                            bgcolor: "#dcfce7",
-                            color: "#15803d"
-                          }}
-                        />
-                      )} */}
                     </Box>
 
                     <Box
@@ -247,7 +219,7 @@ export default function CustomersList({ customers }) {
                     </Typography>
 
                     <Typography fontWeight="bold">
-                      {customer.orders}
+                      {customer.orders || 0}
                     </Typography>
                   </Box>
 
@@ -260,7 +232,7 @@ export default function CustomersList({ customers }) {
                     </Typography>
 
                     <Typography fontWeight="bold">
-                      {customer.spent}
+                      ₦{Number(customer.spent || 0).toLocaleString()}
                     </Typography>
                   </Box>
 
@@ -318,7 +290,7 @@ export default function CustomersList({ customers }) {
                           />
 
                           <Typography variant="body2">
-                            {customer.location}
+                            {customer.city || "N/A"}
                           </Typography>
                         </Box>
                       </Box>
@@ -337,7 +309,13 @@ export default function CustomersList({ customers }) {
                           />
 
                           <Typography variant="body2">
-                            Joined: {customer.joined}
+                            Joined:{" "}
+                              {customer.createdAt?.toDate
+                                ? customer.createdAt.toDate().toLocaleDateString()
+                                : customer.createdAt?.seconds
+                                ? new Date(customer.createdAt.seconds * 1000).toLocaleDateString()
+                                : "-"}
+                            
                           </Typography>
                         </Box>
 
@@ -347,12 +325,18 @@ export default function CustomersList({ customers }) {
                           />
 
                           <Typography variant="body2">
-                            Last Order: {customer.lastOrder}
+                            {/* Last Order: {customer.lastOrder} */}
+                            Last Order:{" "}
+                            {customer.lastOrder?.toDate
+                              ? customer.lastOrder.toDate().toLocaleDateString()
+                              : customer.lastOrder?.seconds
+                              ? new Date(customer.lastOrder.seconds * 1000).toLocaleDateString()
+                              : "No orders"}
                           </Typography>
                         </Box>
 
                         <Typography variant="body2">
-                          Customer ID: {customer.customerId}
+                          Customer ID: {customer.uid}
                         </Typography>
                       </Box>
                     </Box>
@@ -375,7 +359,7 @@ export default function CustomersList({ customers }) {
                           </Typography>
 
                           <Typography variant="body2">
-                            {customer.orders}
+                            {customer.orders || 0}
                           </Typography>
                         </Box>
 
@@ -390,7 +374,7 @@ export default function CustomersList({ customers }) {
                           </Typography>
 
                           <Typography variant="body2">
-                            {customer.spent}
+                            ₦{Number(customer.spent || 0).toLocaleString()}
                           </Typography>
                         </Box>
 
@@ -405,7 +389,8 @@ export default function CustomersList({ customers }) {
                           </Typography>
 
                           <Typography variant="body2">
-                            {customer.avgOrder}
+                            {/* ₦{customer.avgOrder || 0} */}
+                            ₦{Number(customer.avgOrder || 0).toLocaleString()}
                           </Typography>
                         </Box>
                       </Box>
@@ -437,27 +422,55 @@ export default function CustomersList({ customers }) {
                         </TableRow>
                       </TableHead>
 
-                      <TableBody>
-                        {customer.recentOrders.map((order, index) => (
-                          <TableRow key={index}>
-                            <TableCell>{order.id}</TableCell>
-                            <TableCell>{order.date}</TableCell>
-                            <TableCell>{order.items}</TableCell>
-                            <TableCell>{order.total}</TableCell>
+                        {customer.recentOrders?.length ? (
+                          <TableBody>
+                            {customer.recentOrders.map((order, index) => (
+                              // rows...
+                              <TableRow key={index}>
+                                <TableCell>{order.id}</TableCell>
+                                {/* <TableCell>{order.createdAt}</TableCell> */}
+                                <TableCell>
+                                  {order.createdAt?.toDate
+                                    ? order.createdAt.toDate().toLocaleDateString()
+                                    : order.createdAt?.seconds
+                                    ? new Date(order.createdAt.seconds * 1000).toLocaleDateString()
+                                    : "-"}
+                                </TableCell>
+                                <TableCell>
+                                  {order.items?.reduce(
+                                    (sum, item) => sum + (item.quantity || 0),
+                                    0
+                                  ) || 0}
+                                </TableCell>
+                                <TableCell>
+                                  ₦{Number(order.total || 0).toLocaleString()}
+                                </TableCell>
 
-                            <TableCell>
-                              <Chip
-                                label={order.status}
-                                size="small"
-                                sx={{
-                                  bgcolor: "#dcfce7",
-                                  color: "#15803d"
-                                }}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
+                                <TableCell>
+                                  <Chip
+                                    label={order.status}
+                                    size="small"
+                                    sx={{
+                                      bgcolor: "#dcfce7",
+                                      color: "#15803d"
+                                    }}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        ) : (
+                          <TableBody>
+                            <TableRow>
+                              <TableCell colSpan={5} align="center">
+                                No orders found
+                              </TableCell>
+                            </TableRow>
+                          </TableBody>
+                        )}
+                        {/* <<<>>> */}
+                        
+                        {/* <<<>>> */}
                     </Table>
                   </Paper>
 
@@ -537,259 +550,3 @@ export default function CustomersList({ customers }) {
     </Box>
   );
 }
-
-
-
-
-
-
-// import {
-//   Paper,
-//   Box,
-//   Typography,
-//   Avatar,
-//   Chip,
-//   IconButton
-// } from "@mui/material";
-
-// import MailOutlineIcon from "@mui/icons-material/MailOutline";
-// import PhoneIcon from "@mui/icons-material/Phone";
-// import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-// import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
-
-// const customers = [
-//   {
-//     id: 1,
-//     name: "John Doe",
-//     email: "john.doe@email.com",
-//     phone: "+1 (555) 123-4567",
-//     orders: 24,
-//     spent: "$12,850",
-//     status: "VIP",
-//     avatar: "🧑"
-//   },
-
-//   {
-//     id: 2,
-//     name: "Sarah Wilson",
-//     email: "sarah.w@email.com",
-//     phone: "+1 (555) 234-5678",
-//     orders: 18,
-//     spent: "$8,920",
-//     status: "Active",
-//     avatar: "👩"
-//   },
-
-//   {
-//     id: 3,
-//     name: "Mike Johnson",
-//     email: "mike.j@email.com",
-//     phone: "+1 (555) 345-6789",
-//     orders: 32,
-//     spent: "$18,500",
-//     status: "VIP",
-//     avatar: "🧔"
-//   },
-
-//   {
-//     id: 4,
-//     name: "Emma Brown",
-//     email: "emma.b@email.com",
-//     phone: "+1 (555) 456-7890",
-//     orders: 15,
-//     spent: "$6,750",
-//     status: "Active",
-//     avatar: "👩‍💻"
-//   }
-// ];
-
-// export default function CustomersList() {
-//   return (
-//     <Box>
-//       <Typography
-//         variant="body1"
-//         sx={{
-//           color: "#64748b",
-//           mb: 3
-//         }}
-//       >
-//         Showing 10 of 10 customers
-//       </Typography>
-
-//       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-//         {customers.map((customer) => (
-//           <Paper
-//             key={customer.id}
-//             elevation={0}
-//             sx={{
-//               p: 2,
-//               borderRadius: 3,
-//               border: "1px solid #e5e7eb",
-//               display: "flex",
-//               justifyContent: "space-between",
-//               alignItems: "center",
-//               flexWrap: "wrap",
-//               gap: 2
-//             }}
-//           >
-//             {/* LEFT */}
-//             <Box
-//               sx={{
-//                 display: "flex",
-//                 alignItems: "center",
-//                 gap: 2
-//               }}
-//             >
-//               <Avatar
-//                 sx={{
-//                   width: 48,
-//                   height: 48,
-//                   fontSize: "1.5rem",
-//                   bgcolor: "#f1f5f9"
-//                 }}
-//               >
-//                 {customer.avatar}
-//               </Avatar>
-
-//               <Box>
-//                 <Box
-//                   sx={{
-//                     display: "flex",
-//                     alignItems: "center",
-//                     gap: 1,
-//                     mb: 0.5
-//                   }}
-//                 >
-//                   <Typography fontWeight="bold">
-//                     {customer.name}
-//                   </Typography>
-
-//                   {customer.status === "VIP" ? (
-//                     <>
-//                       <Chip
-//                         label="VIP"
-//                         size="small"
-//                         sx={{
-//                           bgcolor: "#f3e8ff",
-//                           color: "#9333ea"
-//                         }}
-//                       />
-
-//                       <WorkspacePremiumIcon
-//                         sx={{
-//                           fontSize: 18,
-//                           color: "#9333ea"
-//                         }}
-//                       />
-//                     </>
-//                   ) : (
-//                     <Chip
-//                       label="Active"
-//                       size="small"
-//                       sx={{
-//                         bgcolor: "#dcfce7",
-//                         color: "#15803d"
-//                       }}
-//                     />
-//                   )}
-//                 </Box>
-
-//                 <Box
-//                   sx={{
-//                     display: "flex",
-//                     alignItems: "center",
-//                     gap: 2,
-//                     flexWrap: "wrap"
-//                   }}
-//                 >
-//                   <Box
-//                     sx={{
-//                       display: "flex",
-//                       alignItems: "center",
-//                       gap: 0.5
-//                     }}
-//                   >
-//                     <MailOutlineIcon
-//                       sx={{
-//                         fontSize: 14,
-//                         color: "#6b7280"
-//                       }}
-//                     />
-
-//                     <Typography
-//                       variant="body2"
-//                       sx={{ color: "#64748b" }}
-//                     >
-//                       {customer.email}
-//                     </Typography>
-//                   </Box>
-
-//                   <Box
-//                     sx={{
-//                       display: "flex",
-//                       alignItems: "center",
-//                       gap: 0.5
-//                     }}
-//                   >
-//                     <PhoneIcon
-//                       sx={{
-//                         fontSize: 14,
-//                         color: "#6b7280"
-//                       }}
-//                     />
-
-//                     <Typography
-//                       variant="body2"
-//                       sx={{ color: "#64748b" }}
-//                     >
-//                       {customer.phone}
-//                     </Typography>
-//                   </Box>
-//                 </Box>
-//               </Box>
-//             </Box>
-
-//             {/* RIGHT */}
-//             <Box
-//               sx={{
-//                 display: "flex",
-//                 alignItems: "center",
-//                 gap: 4
-//               }}
-//             >
-//               <Box textAlign="center">
-//                 <Typography
-//                   variant="caption"
-//                   sx={{ color: "#64748b" }}
-//                 >
-//                   Orders
-//                 </Typography>
-
-//                 <Typography fontWeight="bold">
-//                   {customer.orders}
-//                 </Typography>
-//               </Box>
-
-//               <Box textAlign="center">
-//                 <Typography
-//                   variant="caption"
-//                   sx={{ color: "#64748b" }}
-//                 >
-//                   Total Spent
-//                 </Typography>
-
-//                 <Typography fontWeight="bold">
-//                   {customer.spent}
-//                 </Typography>
-//               </Box>
-
-//               <IconButton>
-//                 <KeyboardArrowDownIcon />
-//               </IconButton>
-//             </Box>
-//           </Paper>
-//         ))}
-//       </Box>
-//     </Box>
-//   );
-// }

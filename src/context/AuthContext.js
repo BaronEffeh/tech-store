@@ -123,9 +123,9 @@ export function AuthProvider({ children }) {
    * LOGOUT
    */
   const logout = async () => {
+    localStorage.removeItem("guestCart");
     await logoutUser();
     setUser(null);
-    localStorage.removeItem("guestCart");
     // resetCart();
   };
 

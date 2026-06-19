@@ -38,14 +38,20 @@ export function CartProvider({ children }) {
   useEffect(() => {
     async function fetchCart() {
       if (!user?.uid) {
-        const guestCart = JSON.parse(
-          localStorage.getItem("guestCart") || "[]"
-        );
-
-        setCart(guestCart);
+        // User is logged out → clear the in-memory cart
+        setCart([]);
         setLoadingCart(false);
         return;
       }
+      // if (!user?.uid) {
+      //   const guestCart = JSON.parse(
+      //     localStorage.getItem("guestCart") || "[]"
+      //   );
+
+      //   setCart(guestCart);
+      //   setLoadingCart(false);
+      //   return;
+      // }
 
       setLoadingCart(true);
 
