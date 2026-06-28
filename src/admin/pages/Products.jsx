@@ -98,19 +98,9 @@ export default function ProductsPage() {
       const data =
         await getProducts();
 
-      // console.log(
-      //   "FIREBASE PRODUCTS:",
-      //   data
-      // );
-
       setProducts(data);
 
     } catch (error) {
-
-      // console.log(
-      //   "FETCH PRODUCTS ERROR:",
-      //   error
-      // );
 
     } finally {
 
@@ -185,22 +175,6 @@ export default function ProductsPage() {
     }
   };
 
-
-  // const handleCreateProduct =
-  //   async (productData) => {
-  //     const response =
-  //       await createProduct(productData);
-
-  //     setProducts(prev => [
-  //       {
-  //         id: response.id,
-  //         ...productData,
-  //       },
-  //       ...prev,
-  //     ]);
-  //   };
-
-
   const handleUpdateProduct = async (productData) => {
     try {
       await updateProduct(productData.id, productData);
@@ -224,26 +198,6 @@ export default function ProductsPage() {
       );
     }
   };
-
-  
-  // const handleUpdateProduct = async (productData) => {
-  //   try {
-  //     await updateProduct(productData.id, productData);
-
-  //     setProducts((prev) =>
-  //       prev.map((item) =>
-  //         item.id === productData.id
-  //           ? productData
-  //           : item
-  //       )
-  //     );
-  //   } catch (error) {
-  //     // console.log("UPDATE ERROR:", error);
-  //   }
-  // };
-
-
-
 
   const handleDeleteClick = (product) => {
   setProductToDelete(product);
@@ -292,52 +246,6 @@ const confirmDeleteProduct =
       setProductToDelete(null);
     }
   };
-
-
-
-
-  // const handleDeleteProduct = async (
-  //   product
-  // ) => {
-
-  //   const confirmDelete =
-  //     window.confirm(
-  //       "Delete this product?"
-  //     );
-
-  //   if (!confirmDelete) return;
-
-  //   try {
-
-  //     // Delete image first
-  //     if (product.image) {
-  //       await deleteProductImage(
-  //         product.image
-  //       );
-  //     }
-
-  //     const success =
-  //       await deleteProduct(product.id);
-
-  //     if (success) {
-
-  //       setProducts((prev) =>
-  //         prev.filter(
-  //           (item) =>
-  //             item.id !== product.id
-  //         )
-  //       );
-  //     }
-
-  //   } catch (error) {
-
-  //     console.log(
-  //       "DELETE PRODUCT ERROR:",
-  //       error
-  //     );
-  //   }
-  // };
-
 
   /* -------------------------------------------------------------------------- */
   /*                              FILTER PRODUCTS                               */
@@ -397,13 +305,6 @@ const confirmDeleteProduct =
   /* -------------------------------------------------------------------------- */
   /*                                  LOADING                                   */
   /* -------------------------------------------------------------------------- */
-
-
-
-//   console.log(
-//   "HANDLE CREATE:",
-//   handleCreateProduct
-// );
 
   return (
     <Box p={1}>

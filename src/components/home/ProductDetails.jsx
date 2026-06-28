@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  Dialog,
+  // Dialog,
   Box,
   Typography,
   IconButton,
@@ -10,14 +11,18 @@ import {
   Tabs,
   Tab
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+// import CloseIcon from "@mui/icons-material/Close";
 import ArrowBackIosNew from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIos from "@mui/icons-material/ArrowForwardIos";
 import LocalShipping from "@mui/icons-material/LocalShipping";
 import VerifiedUser from "@mui/icons-material/VerifiedUser";
 import Replay from "@mui/icons-material/Replay";
 
-export default function ProductDetails({ open, onClose, product, onAdd }) {
+// export default function ProductDetails({ open, onClose, product, onAdd }) {
+export default function ProductDetails({
+  product,
+  onAdd,
+}) {
   const [qty, setQty] = useState(1);
   const [currentImage, setCurrentImage] = useState(0);
   const [tab, setTab] = useState(0);
@@ -33,6 +38,8 @@ export default function ProductDetails({ open, onClose, product, onAdd }) {
   useEffect(() => {
     setReviews(product?.reviewsData || []);
   }, [product]);
+
+  const navigate = useNavigate();
 
   if (!product) return null;
   
@@ -79,7 +86,13 @@ export default function ProductDetails({ open, onClose, product, onAdd }) {
   const breakdown = getRatingBreakdown();
 
   // fallback if no multiple images
-  const images = product.images || [product.image];
+  const images =
+    product.images?.length
+        ? product.images
+        : product.image
+            ? [product.image]
+            : [];
+  // const images = product.images || [product.image];
 
   const handleNext = () => {
     setCurrentImage((prev) => (prev + 1) % images.length);
@@ -92,14 +105,28 @@ export default function ProductDetails({ open, onClose, product, onAdd }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <Box sx={{ p: 3 }}>
+    <Box
+      sx={{
+        maxWidth: 1200,
+        mx: "auto",
+        py: 4,
+        px: 2,
+      }}
+    >
+    {/* // <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth> */}
+      {/* <Box sx={{ p: 3 }}> */}
         {/* Close */}
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        {/* <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
-        </Box>
+        </Box> */}
+        <Button
+          onClick={() => navigate(-1)}
+          sx={{ mb: 2 }}
+        >
+          ← Back
+        </Button>
 
         <Grid container spacing={3}>
           {/* LEFT SIDE - IMAGE GALLERY */}
@@ -493,7 +520,14 @@ export default function ProductDetails({ open, onClose, product, onAdd }) {
             )}
           </Box>
         </Box>
-      </Box>
-    </Dialog>
+        <Button
+          onClick={() => navigate(-1)}
+          sx={{ mb: 2 }}
+        >
+          ← Back
+        </Button>
+      {/* </Box> */}
+    {/* </Dialog> */}
+    </Box>
   );
 }

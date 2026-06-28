@@ -34,23 +34,3 @@ export default function SettingsPanel() {
     </Box>
   );
 }
-
-
-
-
-
-// import { Box, Stack } from "@mui/material";
-
-// import SettingsHeader from "../components/settings/SettingsHeader";
-// import SettingsPanel from "../components/settings/SettingsPanel";
-
-// export default function SettingsPage() {
-//   return (
-//     <Box>
-//       <Stack spacing={3}>
-//         <SettingsHeader />
-//         <SettingsPanel />
-//       </Stack>
-//     </Box>
-//   );
-// }

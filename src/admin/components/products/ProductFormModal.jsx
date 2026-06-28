@@ -29,11 +29,7 @@ import {
   Close,
   CloudUploadOutlined,
 } from '@mui/icons-material';
-
-// Firebase services
-// import {
-//   createProduct,
-// } from '../../../firebase/products';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { 
   getCategories 
@@ -42,7 +38,7 @@ import {
 // Supabase services
 import { 
   uploadProductImage,
-  deleteProductImage,
+  // deleteProductImage,
 } from '../../../services/uploadImage';
 
 
@@ -106,7 +102,10 @@ const ProductFormModal = ({
       });
 
       setTags(productData.tags || []);
-      setImagePreview(productData.image || "");
+      // setImagePreview(productData.image || "");
+      setExistingImages(productData.images || []);
+      setImagePreviews(productData.images || []);
+      setImageFiles([]);
     } else {
       resetForm();
     }
@@ -125,13 +124,19 @@ const ProductFormModal = ({
   const [product, setProduct] =
     useState(initialProductState);
 
-  // Image preview state
-  const [imagePreview, setImagePreview] =
-    useState('');
+  // // Image preview state
+  // const [imagePreview, setImagePreview] =
+  //   useState('');
 
+  // // Actual image file
+  // const [imageFile, setImageFile] =
+  //   useState(null);
+
+  // Image preview state
+  const [imagePreviews, setImagePreviews] = useState([]);
   // Actual image file
-  const [imageFile, setImageFile] =
-    useState(null);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
 
   // Product tags
   const [tag, setTag] = useState('');
@@ -178,61 +183,126 @@ const ProductFormModal = ({
   /*                              IMAGE UPLOAD                                  */
   /* -------------------------------------------------------------------------- */
 
+  // const handleImageUpload = (e) => {
+
+  //   const file = e.target.files[0];
+
+  //   if (!file) return;
+
+  //   /* ------------------------- FILE TYPE VALIDATION ------------------------- */
+
+  //   const allowedTypes = [
+  //     'image/jpeg',
+  //     'image/jpg',
+  //     'image/png',
+  //     'image/webp',
+  //     'image/gif',
+  //   ];
+
+  //   if (!allowedTypes.includes(file.type)) {
+
+  //     showToast(
+  //       'Only JPG, PNG, WEBP or GIF images are allowed',
+  //       'error'
+  //     );
+
+  //     return;
+  //   }
+
+  //   /* --------------------------- FILE SIZE VALIDATION --------------------------- */
+
+  //   const maxSize = 5 * 1024 * 1024;
+
+  //   if (file.size > maxSize) {
+  //     showToast(
+  //       'Image size must be less than 5MB',
+  //       'error'
+  //     );
+
+  //     return;
+  //   }
+
+  //   /* ----------------------------- SAVE IMAGE ----------------------------- */
+
+  //   setImageFile(file);
+
+  //   /* ----------------------------- PREVIEW ----------------------------- */
+
+  //   const imageUrl =
+  //     URL.createObjectURL(file);
+
+  //   setImagePreview(imageUrl);
+  // };
   const handleImageUpload = (e) => {
 
-    const file = e.target.files[0];
+    const files = Array.from(e.target.files);
 
-    if (!file) return;
-
-    /* ------------------------- FILE TYPE VALIDATION ------------------------- */
+    if (!files.length) return;
 
     const allowedTypes = [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/webp',
-      'image/gif',
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      "image/gif",
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    const validFiles = [];
 
-      showToast(
-        'Only JPG, PNG, WEBP or GIF images are allowed',
-        'error'
+    const previews = [];
+
+    for (const file of files) {
+
+      if (!allowedTypes.includes(file.type)) {
+        showToast(
+          `${file.name} is not a supported image`,
+          "error"
+        );
+        continue;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        showToast(
+          `${file.name} exceeds 5MB`,
+          "error"
+        );
+        continue;
+      }
+
+      validFiles.push(file);
+
+      previews.push(URL.createObjectURL(file));
+    }
+
+    setImageFiles(prev => [...prev, ...validFiles]);
+
+    setImagePreviews(prev => [...prev, ...previews]);
+  };
+
+  const removeImage = (index) => {
+
+    if (index < existingImages.length) {
+
+      setExistingImages(prev =>
+        prev.filter((_, i) => i !== index)
       );
-      // alert(
-      //   'Only JPG, PNG, WEBP or GIF images are allowed'
-      // );
+
+      setImagePreviews(prev =>
+        prev.filter((_, i) => i !== index)
+      );
 
       return;
     }
 
-    /* --------------------------- FILE SIZE VALIDATION --------------------------- */
+    const newIndex = index - existingImages.length;
 
-    const maxSize = 5 * 1024 * 1024;
+    setImageFiles(prev =>
+      prev.filter((_, i) => i !== newIndex)
+    );
 
-    if (file.size > maxSize) {
-      showToast(
-        'Image size must be less than 5MB',
-        'error'
-      );
-      // alert(
-      //   'Image size must be less than 5MB'
-      // );
-
-      return;
-    }
-
-    /* ----------------------------- SAVE IMAGE ----------------------------- */
-
-    setImageFile(file);
-
-    /* ----------------------------- PREVIEW ----------------------------- */
-
-    const imageUrl =
-      URL.createObjectURL(file);
-
-    setImagePreview(imageUrl);
+    setImagePreviews(prev =>
+      prev.filter((_, i) => i !== index)
+    );
   };
 
   /* -------------------------------------------------------------------------- */
@@ -278,9 +348,12 @@ const ProductFormModal = ({
 
     setTag('');
 
-    setImagePreview('');
+    // setImagePreview('');
 
-    setImageFile(null);
+    // setImageFile(null);
+    setImageFiles([]);
+    setImagePreviews([]);
+    setExistingImages([]);
   };
 
   /* -------------------------------------------------------------------------- */
@@ -318,54 +391,85 @@ const ProductFormModal = ({
 
       /* ----------------------------- IMAGE UPLOAD ---------------------------- */
 
-      let imageUrl = '';
+      // let imageUrl = '';
 
-      if (imageFile) {
-        try {
+      // if (imageFile) {
+      //   try {
 
-          const oldImage =
-            productData?.image;
+      //     const oldImage =
+      //       productData?.image;
 
-          imageUrl =
-            await uploadProductImage(
-              imageFile
-            );
+      //     imageUrl =
+      //       await uploadProductImage(
+      //         imageFile
+      //       );
 
-          if (!imageUrl) {
-            throw new Error(
-              'Image upload failed'
-            );
+      //     if (!imageUrl) {
+      //       throw new Error(
+      //         'Image upload failed'
+      //       );
+      //     }
+
+      //     // Delete old image only after successful upload
+      //     if (
+      //       mode === "edit" &&
+      //       oldImage &&
+      //       oldImage !== imageUrl
+      //     ) {
+      //       await deleteProductImage(
+      //         oldImage
+      //       );
+      //     }
+
+      //   } catch (uploadError) {
+
+      //     console.log(
+      //       'IMAGE UPLOAD ERROR:',
+      //       uploadError
+      //     );
+
+      //     showToast(
+      //       'Failed to upload image',
+      //       'error'
+      //     );
+
+      //     setLoading(false);
+
+      //     return;
+      //   }
+      // } else {
+      //   imageUrl = imagePreview || '';
+      // }
+      const uploadedImages = [];
+
+      try {
+
+        for (const file of imageFiles) {
+
+          const url =
+            await uploadProductImage(file);
+
+          if (url) {
+
+            uploadedImages.push(url);
+
+          } else {
+
+            throw new Error("Upload failed");
+
           }
-
-          // Delete old image only after successful upload
-          if (
-            mode === "edit" &&
-            oldImage &&
-            oldImage !== imageUrl
-          ) {
-            await deleteProductImage(
-              oldImage
-            );
-          }
-
-        } catch (uploadError) {
-
-          console.log(
-            'IMAGE UPLOAD ERROR:',
-            uploadError
-          );
-
-          showToast(
-            'Failed to upload image',
-            'error'
-          );
-
-          setLoading(false);
-
-          return;
         }
-      } else {
-        imageUrl = imagePreview || '';
+
+      } catch (error) {
+
+        showToast(
+          "Failed to upload one or more images",
+          "error"
+        );
+
+        setLoading(false);
+
+        return;
       }
 
       /* ----------------------------- PRODUCT DATA ---------------------------- */
@@ -394,7 +498,16 @@ const ProductFormModal = ({
         },
 
         tags,
-        image: imageUrl,
+        // image: imageUrl,
+        images: [
+          ...existingImages,
+          ...uploadedImages,
+        ],
+
+        image:
+          existingImages[0] ||
+          uploadedImages[0] ||
+          "",
         featured: product.featured,
         publish: product.publish,
         trackInventory: product.trackInventory,
@@ -414,13 +527,6 @@ const ProductFormModal = ({
         console.log("SUBMIT RESULT:", result);
       }
 
-
-
-
-
-      // if (typeof onSubmit === "function") {
-      //   await onSubmit(payload);
-      // }
 
       /* ----------------------------- SUCCESS ----------------------------- */
 
@@ -446,16 +552,6 @@ const ProductFormModal = ({
   };
 
 
-
-//   console.log(
-//   "PRODUCT FORM PROPS",
-//   {
-//     mode,
-//     onSubmit
-//   }
-// );
-
-
   return (
     <Dialog
       open={open}
@@ -464,58 +560,42 @@ const ProductFormModal = ({
       fullWidth
       PaperProps={{
         sx: {
-          borderRadius: '10px',
-          height: '95vh',
+          borderRadius: "10px",
+          height: "95vh",
         },
       }}
     >
-
-      {/* -------------------------------------------------------------------------- */}
-      {/*                                   HEADER                                   */}
-      {/* -------------------------------------------------------------------------- */}
+      {/* ================= HEADER ================= */}
 
       <DialogTitle
         sx={{
           px: 3,
           py: 2,
-          borderBottom: '1px solid #E5E7EB',
+          borderBottom: "1px solid #E5E7EB",
         }}
       >
         <Stack
           direction="row"
-          alignItems="flex-start"
           justifyContent="space-between"
+          alignItems="center"
         >
           <Box>
             <Typography
               variant="h6"
-              sx={{
-                fontWeight: 700,
-                fontSize: '24px',
-                color: '#111827',
-              }}
+              fontWeight={700}
             >
-              {/* Add New Product */}
-              {
-                mode === "edit"
-                  ? "Edit Product"
-                  : "Add New Product"
-              }
+              {mode === "edit"
+                ? "Edit Product"
+                : "Add New Product"}
             </Typography>
 
             <Typography
               variant="body2"
-              sx={{
-                mt: 0.5,
-                color: '#6B7280',
-              }}
+              color="text.secondary"
             >
-              {/* Add a new product to your inventory */}
-              {
-                mode === "edit"
-                  ? "Update product information"
-                  : "Add a new product to your inventory"
-              }
+              {mode === "edit"
+                ? "Update product information"
+                : "Add a new product"}
             </Typography>
           </Box>
 
@@ -525,22 +605,16 @@ const ProductFormModal = ({
         </Stack>
       </DialogTitle>
 
-      {/* -------------------------------------------------------------------------- */}
-      {/*                                    BODY                                    */}
-      {/* -------------------------------------------------------------------------- */}
+      {/* ================= BODY ================= */}
 
-      <DialogContent
-        dividers
-        sx={{
-          px: 3,
-          py: 3,
-          bgcolor: '#fff',
-        }}
-      >
+      <DialogContent dividers>
 
-        {/* Basic Information */}
+        {/* ---------------- BASIC INFO ---------------- */}
+
         <SectionTitle title="Basic Information" />
+
         <Stack spacing={3}>
+
           <Box>
             <InputLabel
               title="Product Name"
@@ -549,13 +623,13 @@ const ProductFormModal = ({
 
             <TextField
               fullWidth
-              placeholder="e.g., MacBook Pro M3 16-inch"
               value={product.name}
-              onChange={handleChange('name')}
+              onChange={handleChange("name")}
             />
           </Box>
 
           <Grid container spacing={2}>
+
             <Grid item xs={12} md={6}>
               <InputLabel
                 title="SKU"
@@ -564,9 +638,8 @@ const ProductFormModal = ({
 
               <TextField
                 fullWidth
-                placeholder="e.g., LAP-001"
                 value={product.sku}
-                onChange={handleChange('sku')}
+                onChange={handleChange("sku")}
               />
             </Grid>
 
@@ -579,12 +652,12 @@ const ProductFormModal = ({
               <FormControl fullWidth>
                 <Select
                   value={product.category}
-                  onChange={handleChange('category')}
-                  displayEmpty
+                  onChange={handleChange("category")}
                 >
                   <MenuItem value="">
                     Select Category
                   </MenuItem>
+
                   {categories.map((item) => (
                     <MenuItem
                       key={item.id}
@@ -599,31 +672,32 @@ const ProductFormModal = ({
                   ))}
                 </Select>
               </FormControl>
-
             </Grid>
+
           </Grid>
 
           <Box>
             <InputLabel title="Description" />
 
             <TextField
-              fullWidth
               multiline
               rows={5}
-              placeholder="Enter product description..."
+              fullWidth
               value={product.description}
-              onChange={handleChange(
-                'description'
-              )}
+              onChange={handleChange("description")}
             />
           </Box>
+
         </Stack>
 
         <SectionDivider />
 
-        {/* Pricing */}
+        {/* ---------------- PRICING ---------------- */}
+
         <SectionTitle title="Pricing" />
+
         <Grid container spacing={2}>
+
           <Grid item xs={12} md={6}>
             <InputLabel
               title="Price"
@@ -632,9 +706,8 @@ const ProductFormModal = ({
 
             <TextField
               fullWidth
-              placeholder="0.00"
               value={product.price}
-              onChange={handleChange('price')}
+              onChange={handleChange("price")}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -646,18 +719,12 @@ const ProductFormModal = ({
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <InputLabel
-              title="Compare at Price"
-            />
+            <InputLabel title="Compare Price" />
 
             <TextField
               fullWidth
-              placeholder="0.00"
-              helperText="Original price for discount display"
               value={product.comparePrice}
-              onChange={handleChange(
-                'comparePrice'
-              )}
+              onChange={handleChange("comparePrice")}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -667,13 +734,17 @@ const ProductFormModal = ({
               }}
             />
           </Grid>
+
         </Grid>
 
         <SectionDivider />
 
-        {/* Inventory */}
+        {/* ---------------- INVENTORY ---------------- */}
+
         <SectionTitle title="Inventory" />
+
         <Grid container spacing={2}>
+
           <Grid item xs={12} md={6}>
             <InputLabel
               title="Stock Quantity"
@@ -681,11 +752,11 @@ const ProductFormModal = ({
             />
 
             <TextField
-              fullWidth
               type="number"
+              fullWidth
               value={product.stockQuantity}
               onChange={handleChange(
-                'stockQuantity'
+                "stockQuantity"
               )}
             />
           </Grid>
@@ -696,116 +767,127 @@ const ProductFormModal = ({
             />
 
             <TextField
-              fullWidth
               type="number"
-              helperText="Alert when stock falls below this number"
-              value={
-                product.lowStockThreshold
-              }
+              fullWidth
+              value={product.lowStockThreshold}
               onChange={handleChange(
-                'lowStockThreshold'
+                "lowStockThreshold"
               )}
             />
           </Grid>
+
         </Grid>
 
         <SectionDivider />
 
-        {/* Product Images */}
+        {/* =======================================================
+                      PRODUCT IMAGES (NEW)
+        ======================================================== */}
+
         <SectionTitle title="Product Images" />
-        <Box
-          sx={{
-            border: '1px dashed #D1D5DB',
-            borderRadius: '10px',
-            py: 6,
-            px: 3,
-            textAlign: 'center',
-            mt: 2,
-          }}
-        >
 
-          <input
-            type="file"
-            accept="image/*"
-            id="product-image-upload"
-            hidden
-            onChange={handleImageUpload}
-          />
+        <input
+          hidden
+          multiple
+          accept="image/*"
+          type="file"
+          id="product-upload"
+          onChange={handleImageUpload}
+        />
 
-          <label htmlFor="product-image-upload">
-            <Box sx={{ cursor: 'pointer' }}>
-              {imagePreview ? (
-                <Box>
+        <label htmlFor="product-upload">
+
+          <Box
+            sx={{
+              border: "2px dashed #d5d5d5",
+              borderRadius: 2,
+              py: 4,
+              textAlign: "center",
+              cursor: "pointer",
+              mb: 3,
+            }}
+          >
+            <CloudUploadOutlined
+              sx={{
+                fontSize: 45,
+                color: "#888",
+              }}
+            />
+
+            <Typography mt={1}>
+              Click to upload product images
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+            >
+              JPG, PNG, WEBP (Multiple images supported)
+            </Typography>
+
+          </Box>
+
+        </label>
+
+        {imagePreviews.length > 0 && (
+
+          <Grid container spacing={2}>
+
+            {imagePreviews.map((image, index) => (
+
+              <Grid
+                item
+                xs={6}
+                sm={4}
+                md={3}
+                key={index}
+              >
+
+                <Box
+                  sx={{
+                    position: "relative",
+                  }}
+                >
+
                   <Box
                     component="img"
-                    src={imagePreview}
-                    alt="Preview"
+                    src={image}
                     sx={{
-                      width: 180,
-                      height: 180,
-                      objectFit: 'cover',
-                      borderRadius: '12px',
-                      mx: 'auto',
-                      mb: 2,
+                      width: "100%",
+                      height: 150,
+                      objectFit: "cover",
+                      borderRadius: 2,
                     }}
                   />
 
-                  <Typography
-                    variant="body2"
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      removeImage(index)
+                    }
                     sx={{
-                      color: '#6B7280',
+                      position: "absolute",
+                      top: 6,
+                      right: 6,
+                      bgcolor: "#fff",
                     }}
                   >
-                    Click to change image
-                  </Typography>
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+
                 </Box>
-              ) : (
-                <>
-                  <CloudUploadOutlined
-                    sx={{
-                      fontSize: 42,
-                      color: '#6B7280',
-                      mb: 1,
-                    }}
-                  />
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#111827',
-                      mb: 1,
-                    }}
-                  >
-                    Click to upload product image
-                  </Typography>
 
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: '#9CA3AF',
-                    }}
-                  >
-                    PNG, JPG or GIF (max 5MB)
-                  </Typography>
+              </Grid>
 
-                  {imageFile && (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        mt: 1,
-                        color: '#059669',
-                        fontWeight: 500,
-                      }}
-                    >
-                      {imageFile.name}
-                    </Typography>
-                  )}
-                </>
-              )}
-            </Box>
-          </label>
-        </Box>
+            ))}
+
+          </Grid>
+
+        )}
 
         <SectionDivider />
+
+        {/* ---------- LEAVE THE REST OF YOUR JSX EXACTLY THE SAME ---------- */}
 
         {/* Product Tags */}
         <SectionTitle title="Product Tags" />
@@ -970,32 +1052,26 @@ const ProductFormModal = ({
             label="Featured product"
           />
         </Stack>
+
+        {/* Shipping */}
+
+        {/* Product Status */}
+
       </DialogContent>
 
-      {/* -------------------------------------------------------------------------- */}
-      {/*                                   FOOTER                                   */}
-      {/* -------------------------------------------------------------------------- */}
+      {/* ================= FOOTER ================= */}
 
       <Box
         sx={{
-          px: 3,
-          py: 2,
-          borderTop: '1px solid #E5E7EB',
-          display: 'flex',
-          justifyContent: 'flex-end',
+          display: "flex",
+          justifyContent: "flex-end",
           gap: 2,
-          bgcolor: '#fff',
+          p: 3,
         }}
       >
         <Button
-          variant="outlined"
           onClick={onClose}
-          disabled={loading}
-          sx={{
-            borderRadius: '10px',
-            textTransform: 'none',
-            px: 3,
-          }}
+          variant="outlined"
         >
           Cancel
         </Button>
@@ -1004,28 +1080,13 @@ const ProductFormModal = ({
           variant="contained"
           onClick={handleSubmit}
           disabled={loading}
-          sx={{
-            borderRadius: '10px',
-            bgcolor: '#050816',
-            px: 3,
-            textTransform: 'none',
-            fontWeight: 600,
-            '&:hover': {
-              bgcolor: '#111827',
-            },
-          }}
         >
-
           {loading ? (
-            <CircularProgress
-              size={22}
-              sx={{ color: '#fff' }}
-            />
+            <CircularProgress size={22} />
+          ) : mode === "edit" ? (
+            "Update Product"
           ) : (
-            // 'Add Product'
-            mode === "edit"
-              ? "Update Product"
-              : "Add Product"
+            "Add Product"
           )}
         </Button>
       </Box>
@@ -1039,27 +1100,623 @@ const ProductFormModal = ({
             open: false,
           }))
         }
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
       >
         <Alert
           severity={toast.severity}
           variant="filled"
-          onClose={() =>
-            setToast((prev) => ({
-              ...prev,
-              open: false,
-            }))
-          }
-          sx={{ width: '100%' }}
         >
           {toast.message}
         </Alert>
       </Snackbar>
+
     </Dialog>
   );
+
+
+  // return (
+  //   <Dialog
+  //     open={open}
+  //     onClose={onClose}
+  //     maxWidth="md"
+  //     fullWidth
+  //     PaperProps={{
+  //       sx: {
+  //         borderRadius: '10px',
+  //         height: '95vh',
+  //       },
+  //     }}
+  //   >
+
+  //     {/* -------------------------------------------------------------------------- */}
+  //     {/*                                   HEADER                                   */}
+  //     {/* -------------------------------------------------------------------------- */}
+
+  //     <DialogTitle
+  //       sx={{
+  //         px: 3,
+  //         py: 2,
+  //         borderBottom: '1px solid #E5E7EB',
+  //       }}
+  //     >
+  //       <Stack
+  //         direction="row"
+  //         alignItems="flex-start"
+  //         justifyContent="space-between"
+  //       >
+  //         <Box>
+  //           <Typography
+  //             variant="h6"
+  //             sx={{
+  //               fontWeight: 700,
+  //               fontSize: '24px',
+  //               color: '#111827',
+  //             }}
+  //           >
+  //             {/* Add New Product */}
+  //             {
+  //               mode === "edit"
+  //                 ? "Edit Product"
+  //                 : "Add New Product"
+  //             }
+  //           </Typography>
+
+  //           <Typography
+  //             variant="body2"
+  //             sx={{
+  //               mt: 0.5,
+  //               color: '#6B7280',
+  //             }}
+  //           >
+  //             {/* Add a new product to your inventory */}
+  //             {
+  //               mode === "edit"
+  //                 ? "Update product information"
+  //                 : "Add a new product to your inventory"
+  //             }
+  //           </Typography>
+  //         </Box>
+
+  //         <IconButton onClick={onClose}>
+  //           <Close />
+  //         </IconButton>
+  //       </Stack>
+  //     </DialogTitle>
+
+  //     {/* -------------------------------------------------------------------------- */}
+  //     {/*                                    BODY                                    */}
+  //     {/* -------------------------------------------------------------------------- */}
+
+  //     <DialogContent
+  //       dividers
+  //       sx={{
+  //         px: 3,
+  //         py: 3,
+  //         bgcolor: '#fff',
+  //       }}
+  //     >
+
+  //       {/* Basic Information */}
+  //       <SectionTitle title="Basic Information" />
+  //       <Stack spacing={3}>
+  //         <Box>
+  //           <InputLabel
+  //             title="Product Name"
+  //             required
+  //           />
+
+  //           <TextField
+  //             fullWidth
+  //             placeholder="e.g., MacBook Pro M3 16-inch"
+  //             value={product.name}
+  //             onChange={handleChange('name')}
+  //           />
+  //         </Box>
+
+  //         <Grid container spacing={2}>
+  //           <Grid item xs={12} md={6}>
+  //             <InputLabel
+  //               title="SKU"
+  //               required
+  //             />
+
+  //             <TextField
+  //               fullWidth
+  //               placeholder="e.g., LAP-001"
+  //               value={product.sku}
+  //               onChange={handleChange('sku')}
+  //             />
+  //           </Grid>
+
+  //           <Grid item xs={12} md={6}>
+  //             <InputLabel
+  //               title="Category"
+  //               required
+  //             />
+
+  //             <FormControl fullWidth>
+  //               <Select
+  //                 value={product.category}
+  //                 onChange={handleChange('category')}
+  //                 displayEmpty
+  //               >
+  //                 <MenuItem value="">
+  //                   Select Category
+  //                 </MenuItem>
+  //                 {categories.map((item) => (
+  //                   <MenuItem
+  //                     key={item.id}
+  //                     value={JSON.stringify({
+  //                       id: item.id,
+  //                       name: item.name,
+  //                       slug: item.slug,
+  //                     })}
+  //                   >
+  //                     {item.name}
+  //                   </MenuItem>
+  //                 ))}
+  //               </Select>
+  //             </FormControl>
+
+  //           </Grid>
+  //         </Grid>
+
+  //         <Box>
+  //           <InputLabel title="Description" />
+
+  //           <TextField
+  //             fullWidth
+  //             multiline
+  //             rows={5}
+  //             placeholder="Enter product description..."
+  //             value={product.description}
+  //             onChange={handleChange(
+  //               'description'
+  //             )}
+  //           />
+  //         </Box>
+  //       </Stack>
+
+  //       <SectionDivider />
+
+  //       {/* Pricing */}
+  //       <SectionTitle title="Pricing" />
+  //       <Grid container spacing={2}>
+  //         <Grid item xs={12} md={6}>
+  //           <InputLabel
+  //             title="Price"
+  //             required
+  //           />
+
+  //           <TextField
+  //             fullWidth
+  //             placeholder="0.00"
+  //             value={product.price}
+  //             onChange={handleChange('price')}
+  //             InputProps={{
+  //               startAdornment: (
+  //                 <InputAdornment position="start">
+  //                   ₦
+  //                 </InputAdornment>
+  //               ),
+  //             }}
+  //           />
+  //         </Grid>
+
+  //         <Grid item xs={12} md={6}>
+  //           <InputLabel
+  //             title="Compare at Price"
+  //           />
+
+  //           <TextField
+  //             fullWidth
+  //             placeholder="0.00"
+  //             helperText="Original price for discount display"
+  //             value={product.comparePrice}
+  //             onChange={handleChange(
+  //               'comparePrice'
+  //             )}
+  //             InputProps={{
+  //               startAdornment: (
+  //                 <InputAdornment position="start">
+  //                   ₦
+  //                 </InputAdornment>
+  //               ),
+  //             }}
+  //           />
+  //         </Grid>
+  //       </Grid>
+
+  //       <SectionDivider />
+
+  //       {/* Inventory */}
+  //       <SectionTitle title="Inventory" />
+  //       <Grid container spacing={2}>
+  //         <Grid item xs={12} md={6}>
+  //           <InputLabel
+  //             title="Stock Quantity"
+  //             required
+  //           />
+
+  //           <TextField
+  //             fullWidth
+  //             type="number"
+  //             value={product.stockQuantity}
+  //             onChange={handleChange(
+  //               'stockQuantity'
+  //             )}
+  //           />
+  //         </Grid>
+
+  //         <Grid item xs={12} md={6}>
+  //           <InputLabel
+  //             title="Low Stock Threshold"
+  //           />
+
+  //           <TextField
+  //             fullWidth
+  //             type="number"
+  //             helperText="Alert when stock falls below this number"
+  //             value={
+  //               product.lowStockThreshold
+  //             }
+  //             onChange={handleChange(
+  //               'lowStockThreshold'
+  //             )}
+  //           />
+  //         </Grid>
+  //       </Grid>
+
+  //       <SectionDivider />
+
+  //       {/* Product Images */}
+  //       <SectionTitle title="Product Images" />
+  //       <Box
+  //         sx={{
+  //           border: '1px dashed #D1D5DB',
+  //           borderRadius: '10px',
+  //           py: 6,
+  //           px: 3,
+  //           textAlign: 'center',
+  //           mt: 2,
+  //         }}
+  //       >
+
+  //         <input
+  //           type="file"
+  //           accept="image/*"
+  //           id="product-image-upload"
+  //           hidden
+  //           onChange={handleImageUpload}
+  //         />
+
+  //         <label htmlFor="product-image-upload">
+  //           <Box sx={{ cursor: 'pointer' }}>
+  //             {imagePreview ? (
+  //               <Box>
+  //                 <Box
+  //                   component="img"
+  //                   src={imagePreview}
+  //                   alt="Preview"
+  //                   sx={{
+  //                     width: 180,
+  //                     height: 180,
+  //                     objectFit: 'cover',
+  //                     borderRadius: '12px',
+  //                     mx: 'auto',
+  //                     mb: 2,
+  //                   }}
+  //                 />
+
+  //                 <Typography
+  //                   variant="body2"
+  //                   sx={{
+  //                     color: '#6B7280',
+  //                   }}
+  //                 >
+  //                   Click to change image
+  //                 </Typography>
+  //               </Box>
+  //             ) : (
+  //               <>
+  //                 <CloudUploadOutlined
+  //                   sx={{
+  //                     fontSize: 42,
+  //                     color: '#6B7280',
+  //                     mb: 1,
+  //                   }}
+  //                 />
+  //                 <Typography
+  //                   variant="body1"
+  //                   sx={{
+  //                     color: '#111827',
+  //                     mb: 1,
+  //                   }}
+  //                 >
+  //                   Click to upload product image
+  //                 </Typography>
+
+  //                 <Typography
+  //                   variant="body2"
+  //                   sx={{
+  //                     color: '#9CA3AF',
+  //                   }}
+  //                 >
+  //                   PNG, JPG or GIF (max 5MB)
+  //                 </Typography>
+
+  //                 {imageFile && (
+  //                   <Typography
+  //                     variant="body2"
+  //                     sx={{
+  //                       mt: 1,
+  //                       color: '#059669',
+  //                       fontWeight: 500,
+  //                     }}
+  //                   >
+  //                     {imageFile.name}
+  //                   </Typography>
+  //                 )}
+  //               </>
+  //             )}
+  //           </Box>
+  //         </label>
+  //       </Box>
+
+  //       <SectionDivider />
+
+  //       {/* Product Tags */}
+  //       <SectionTitle title="Product Tags" />
+  //       <Stack
+  //         direction="row"
+  //         spacing={1}
+  //         alignItems="center"
+  //       >
+  //         <TextField
+  //           fullWidth
+  //           placeholder="Add a tag..."
+  //           value={tag}
+  //           onChange={(e) =>
+  //             setTag(e.target.value)
+  //           }
+  //         />
+
+  //         <Button
+  //           variant="contained"
+  //           onClick={handleAddTag}
+  //           sx={{
+  //             minWidth: 44,
+  //             width: 44,
+  //             height: 44,
+  //             borderRadius: '10px',
+  //             bgcolor: '#050816',
+  //           }}
+  //         >
+  //           <Add />
+  //         </Button>
+  //       </Stack>
+
+  //       {tags.length > 0 && (
+  //         <Stack
+  //           direction="row"
+  //           spacing={1}
+  //           flexWrap="wrap"
+  //           mt={2}
+  //         >
+
+  //           {tags.map((item) => (
+
+  //             <Box
+  //               key={item}
+  //               onClick={() =>
+  //                 handleRemoveTag(item)
+  //               }
+  //               sx={{
+  //                 px: 1.5,
+  //                 py: 0.8,
+  //                 bgcolor: '#F3F4F6',
+  //                 borderRadius: '8px',
+  //                 fontSize: '14px',
+  //                 cursor: 'pointer',
+  //               }}
+  //             >
+  //               {item}
+  //             </Box>
+  //           ))}
+  //         </Stack>
+  //       )}
+
+  //       <SectionDivider />
+
+  //       {/* Shipping Information */}
+  //       <SectionTitle title="Shipping Information" />
+  //       <Stack spacing={3}>
+  //         <Box>
+  //           <InputLabel title="Weight (kg)" />
+
+  //           <TextField
+  //             fullWidth
+  //             type="number"
+  //             placeholder="0.00"
+  //             value={product.weight}
+  //             onChange={handleChange('weight')}
+  //           />
+  //         </Box>
+
+  //         <Box>
+  //           <InputLabel title="Dimensions (cm)" />
+  //           <Grid container spacing={2}>
+  //             <Grid item xs={12} md={4}>
+  //               <TextField
+  //                 fullWidth
+  //                 type="number"
+  //                 placeholder="Length"
+  //                 value={product.length}
+  //                 onChange={handleChange(
+  //                   'length'
+  //                 )}
+  //               />
+  //             </Grid>
+
+  //             <Grid item xs={12} md={4}>
+  //               <TextField
+  //                 fullWidth
+  //                 type="number"
+  //                 placeholder="Width"
+  //                 value={product.width}
+  //                 onChange={handleChange(
+  //                   'width'
+  //                 )}
+  //               />
+  //             </Grid>
+
+  //             <Grid item xs={12} md={4}>
+  //               <TextField
+  //                 fullWidth
+  //                 type="number"
+  //                 placeholder="Height"
+  //                 value={product.height}
+  //                 onChange={handleChange(
+  //                   'height'
+  //                 )}
+  //               />
+  //             </Grid>
+  //           </Grid>
+  //         </Box>
+  //       </Stack>
+
+  //       <SectionDivider />
+
+  //       {/* Product Status */}
+  //       <SectionTitle title="Product Status" />
+  //       <Stack spacing={2} mt={2}>
+  //         <FormControlLabel
+  //           control={
+  //             <Checkbox
+  //               checked={product.publish}
+  //               onChange={handleChange(
+  //                 'publish'
+  //               )}
+  //             />
+  //           }
+  //           label="Publish product"
+  //         />
+
+  //         <FormControlLabel
+  //           control={
+  //             <Checkbox
+  //               checked={
+  //                 product.trackInventory
+  //               }
+  //               onChange={handleChange(
+  //                 'trackInventory'
+  //               )}
+  //             />
+  //           }
+  //           label="Track inventory"
+  //         />
+
+  //         <FormControlLabel
+  //           control={
+  //             <Checkbox
+  //               checked={product.featured}
+  //               onChange={handleChange(
+  //                 'featured'
+  //               )}
+  //             />
+  //           }
+  //           label="Featured product"
+  //         />
+  //       </Stack>
+  //     </DialogContent>
+
+  //     {/* -------------------------------------------------------------------------- */}
+  //     {/*                                   FOOTER                                   */}
+  //     {/* -------------------------------------------------------------------------- */}
+
+  //     <Box
+  //       sx={{
+  //         px: 3,
+  //         py: 2,
+  //         borderTop: '1px solid #E5E7EB',
+  //         display: 'flex',
+  //         justifyContent: 'flex-end',
+  //         gap: 2,
+  //         bgcolor: '#fff',
+  //       }}
+  //     >
+  //       <Button
+  //         variant="outlined"
+  //         onClick={onClose}
+  //         disabled={loading}
+  //         sx={{
+  //           borderRadius: '10px',
+  //           textTransform: 'none',
+  //           px: 3,
+  //         }}
+  //       >
+  //         Cancel
+  //       </Button>
+
+  //       <Button
+  //         variant="contained"
+  //         onClick={handleSubmit}
+  //         disabled={loading}
+  //         sx={{
+  //           borderRadius: '10px',
+  //           bgcolor: '#050816',
+  //           px: 3,
+  //           textTransform: 'none',
+  //           fontWeight: 600,
+  //           '&:hover': {
+  //             bgcolor: '#111827',
+  //           },
+  //         }}
+  //       >
+
+  //         {loading ? (
+  //           <CircularProgress
+  //             size={22}
+  //             sx={{ color: '#fff' }}
+  //           />
+  //         ) : (
+  //           // 'Add Product'
+  //           mode === "edit"
+  //             ? "Update Product"
+  //             : "Add Product"
+  //         )}
+  //       </Button>
+  //     </Box>
+
+  //     <Snackbar
+  //       open={toast.open}
+  //       autoHideDuration={4000}
+  //       onClose={() =>
+  //         setToast((prev) => ({
+  //           ...prev,
+  //           open: false,
+  //         }))
+  //       }
+  //       anchorOrigin={{
+  //         vertical: 'top',
+  //         horizontal: 'right',
+  //       }}
+  //     >
+  //       <Alert
+  //         severity={toast.severity}
+  //         variant="filled"
+  //         onClose={() =>
+  //           setToast((prev) => ({
+  //             ...prev,
+  //             open: false,
+  //           }))
+  //         }
+  //         sx={{ width: '100%' }}
+  //       >
+  //         {toast.message}
+  //       </Alert>
+  //     </Snackbar>
+  //   </Dialog>
+  // );
 };
 
 export default ProductFormModal;
@@ -1067,12 +1724,14 @@ export default ProductFormModal;
 
 /* -------------------------------- Components -------------------------------- */
 
+/* -------------------------------- Components -------------------------------- */
+
 const SectionTitle = ({ title }) => (
   <Typography
     sx={{
-      fontSize: '18px',
+      fontSize: "18px",
       fontWeight: 700,
-      color: '#111827',
+      color: "#111827",
       mb: 2,
       mt: 1,
     }}
@@ -1087,9 +1746,9 @@ const InputLabel = ({
 }) => (
   <Typography
     sx={{
-      fontSize: '14px',
+      fontSize: "14px",
       fontWeight: 600,
-      color: '#111827',
+      color: "#111827",
       mb: 1,
     }}
   >
@@ -1099,8 +1758,8 @@ const InputLabel = ({
       <Box
         component="span"
         sx={{
-          color: '#EF4444',
-          ml: 0.4,
+          color: "#EF4444",
+          ml: 0.5,
         }}
       >
         *
@@ -1113,7 +1772,57 @@ const SectionDivider = () => (
   <Divider
     sx={{
       my: 4,
-      borderColor: '#E5E7EB',
+      borderColor: "#E5E7EB",
     }}
   />
 );
+// const SectionTitle = ({ title }) => (
+//   <Typography
+//     sx={{
+//       fontSize: '18px',
+//       fontWeight: 700,
+//       color: '#111827',
+//       mb: 2,
+//       mt: 1,
+//     }}
+//   >
+//     {title}
+//   </Typography>
+// );
+
+// const InputLabel = ({
+//   title,
+//   required = false,
+// }) => (
+//   <Typography
+//     sx={{
+//       fontSize: '14px',
+//       fontWeight: 600,
+//       color: '#111827',
+//       mb: 1,
+//     }}
+//   >
+//     {title}
+
+//     {required && (
+//       <Box
+//         component="span"
+//         sx={{
+//           color: '#EF4444',
+//           ml: 0.4,
+//         }}
+//       >
+//         *
+//       </Box>
+//     )}
+//   </Typography>
+// );
+
+// const SectionDivider = () => (
+//   <Divider
+//     sx={{
+//       my: 4,
+//       borderColor: '#E5E7EB',
+//     }}
+//   />
+// );

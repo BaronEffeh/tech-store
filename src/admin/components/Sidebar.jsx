@@ -6,7 +6,7 @@ import {
   ListItemIcon,
   ListItemText,
   Avatar,
-  Divider
+  Divider,
 } from "@mui/material";
 
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -18,10 +18,12 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LaptopMacIcon from "@mui/icons-material/LaptopMac";
 
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   const menu = [
     { name: "Dashboard", icon: <DashboardIcon />, path: "/admin" },
@@ -29,8 +31,16 @@ export default function Sidebar() {
     { name: "Orders", icon: <ShoppingCartIcon />, path: "/admin/orders" },
     { name: "Customers", icon: <PeopleIcon />, path: "/admin/customers" },
     { name: "Analytics", icon: <BarChartIcon />, path: "/admin/analytics" },
-    { name: "Settings", icon: <SettingsIcon />, path: "/admin/settings" }
+    { name: "Settings", icon: <SettingsIcon />, path: "/admin/settings" },
   ];
+
+  const initials =
+    user?.displayName
+      ?.split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "U";
 
   return (
     <Box
@@ -45,7 +55,7 @@ export default function Sidebar() {
         flexDirection: "column",
         justifyContent: "space-between",
         borderRight: "1px solid #e5e7eb",
-        overflow: "hidden"
+        overflow: "hidden",
       }}
     >
       {/* TOP */}
@@ -56,7 +66,7 @@ export default function Sidebar() {
             display: "flex",
             alignItems: "center",
             px: 3,
-            py: 4
+            py: 4,
           }}
         >
           <Box
@@ -64,7 +74,7 @@ export default function Sidebar() {
               bgcolor: "#0f172a",
               p: 1.5,
               borderRadius: 2,
-              mr: 2
+              mr: 2,
             }}
           >
             <LaptopMacIcon sx={{ color: "#fff" }} />
@@ -81,7 +91,6 @@ export default function Sidebar() {
           </Box>
         </Box>
 
-        {/* DIVIDER */}
         <Divider />
 
         {/* MENU */}
@@ -99,14 +108,14 @@ export default function Sidebar() {
                   py: 1.3,
                   bgcolor: isActive ? "#e5e7eb" : "transparent",
                   "&:hover": {
-                    bgcolor: "#e5e7eb"
-                  }
+                    bgcolor: "#e5e7eb",
+                  },
                 }}
               >
                 <ListItemIcon
                   sx={{
                     color: "#111827",
-                    minWidth: 40
+                    minWidth: 40,
                   }}
                 >
                   {item.icon}
@@ -115,7 +124,7 @@ export default function Sidebar() {
                 <ListItemText
                   primary={item.name}
                   primaryTypographyProps={{
-                    fontWeight: isActive ? "bold" : 500
+                    fontWeight: isActive ? "bold" : 500,
                   }}
                 />
               </ListItemButton>
@@ -124,40 +133,43 @@ export default function Sidebar() {
         </List>
       </Box>
 
-      {/* BOTTOM SECTION */}
+      {/* BOTTOM */}
       <Box>
-        {/* DIVIDER */}
         <Divider />
 
-        {/* USER */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             gap: 2,
-            p: 2.5
+            p: 2.5,
           }}
         >
           <Avatar
+            src={user?.photoURL || ""}
             sx={{
               bgcolor: "#0f172a",
               width: 46,
-              height: 46
+              height: 46,
             }}
           >
-            AD
+            {!user?.photoURL && initials}
           </Avatar>
 
-          <Box>
-            <Typography fontWeight="bold">
-              Admin User
+          <Box sx={{ overflow: "hidden" }}>
+            <Typography
+              fontWeight="bold"
+              noWrap
+            >
+              {user?.displayName || "Guest User"}
             </Typography>
 
             <Typography
               variant="body2"
               color="text.secondary"
+              noWrap
             >
-              admin@techhub.com
+              {user?.email || "Not signed in"}
             </Typography>
           </Box>
         </Box>
@@ -170,6 +182,7 @@ export default function Sidebar() {
 
 
 
+
 // import {
 //   Box,
 //   Typography,
@@ -177,7 +190,8 @@ export default function Sidebar() {
 //   ListItemButton,
 //   ListItemIcon,
 //   ListItemText,
-//   Avatar
+//   Avatar,
+//   Divider
 // } from "@mui/material";
 
 // import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -206,20 +220,30 @@ export default function Sidebar() {
 //   return (
 //     <Box
 //       sx={{
-//         width: 260,
+//         width: 250,
 //         height: "100vh",
-//         bgcolor: "#f8fafc",
+//         position: "fixed",
+//         top: 0,
+//         left: 0,
+//         bgcolor: "#f5f5f5",
 //         display: "flex",
 //         flexDirection: "column",
 //         justifyContent: "space-between",
 //         borderRight: "1px solid #e5e7eb",
-//         p: 2
+//         overflow: "hidden"
 //       }}
 //     >
 //       {/* TOP */}
 //       <Box>
 //         {/* LOGO */}
-//         <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+//         <Box
+//           sx={{
+//             display: "flex",
+//             alignItems: "center",
+//             px: 3,
+//             py: 4
+//           }}
+//         >
 //           <Box
 //             sx={{
 //               bgcolor: "#0f172a",
@@ -232,15 +256,21 @@ export default function Sidebar() {
 //           </Box>
 
 //           <Box>
-//             <Typography fontWeight="bold">TechHub</Typography>
+//             <Typography fontWeight="bold" fontSize={28}>
+//               TechHub
+//             </Typography>
+
 //             <Typography variant="body2" color="text.secondary">
 //               Admin Panel
 //             </Typography>
 //           </Box>
 //         </Box>
 
+//         {/* DIVIDER */}
+//         <Divider />
+
 //         {/* MENU */}
-//         <List>
+//         <List sx={{ px: 2, py: 3 }}>
 //           {menu.map((item) => {
 //             const isActive = location.pathname === item.path;
 
@@ -249,22 +279,28 @@ export default function Sidebar() {
 //                 key={item.name}
 //                 onClick={() => navigate(item.path)}
 //                 sx={{
-//                   borderRadius: 2,
+//                   borderRadius: 3,
 //                   mb: 1,
+//                   py: 1.3,
 //                   bgcolor: isActive ? "#e5e7eb" : "transparent",
 //                   "&:hover": {
 //                     bgcolor: "#e5e7eb"
 //                   }
 //                 }}
 //               >
-//                 <ListItemIcon sx={{ color: "#111827" }}>
+//                 <ListItemIcon
+//                   sx={{
+//                     color: "#111827",
+//                     minWidth: 40
+//                   }}
+//                 >
 //                   {item.icon}
 //                 </ListItemIcon>
 
 //                 <ListItemText
 //                   primary={item.name}
 //                   primaryTypographyProps={{
-//                     fontWeight: isActive ? "bold" : "medium"
+//                     fontWeight: isActive ? "bold" : 500
 //                   }}
 //                 />
 //               </ListItemButton>
@@ -273,24 +309,42 @@ export default function Sidebar() {
 //         </List>
 //       </Box>
 
-//       {/* BOTTOM USER */}
-//       <Box
-//         sx={{
-//           display: "flex",
-//           alignItems: "center",
-//           gap: 2,
-//           p: 1.5,
-//           borderRadius: 2,
-//           bgcolor: "#f1f5f9"
-//         }}
-//       >
-//         <Avatar sx={{ bgcolor: "#0f172a" }}>AD</Avatar>
+//       {/* BOTTOM SECTION */}
+//       <Box>
+//         {/* DIVIDER */}
+//         <Divider />
 
-//         <Box>
-//           <Typography fontWeight="bold">Admin User</Typography>
-//           <Typography variant="body2" color="text.secondary">
-//             admin@techhub.com
-//           </Typography>
+//         {/* USER */}
+//         <Box
+//           sx={{
+//             display: "flex",
+//             alignItems: "center",
+//             gap: 2,
+//             p: 2.5
+//           }}
+//         >
+//           <Avatar
+//             sx={{
+//               bgcolor: "#0f172a",
+//               width: 46,
+//               height: 46
+//             }}
+//           >
+//             AD
+//           </Avatar>
+
+//           <Box>
+//             <Typography fontWeight="bold">
+//               Admin User
+//             </Typography>
+
+//             <Typography
+//               variant="body2"
+//               color="text.secondary"
+//             >
+//               admin@techhub.com
+//             </Typography>
+//           </Box>
 //         </Box>
 //       </Box>
 //     </Box>

@@ -22,7 +22,11 @@ export default function AuthPage() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectPath = location.state?.from || "/checkout";
+  // const redirectPath = location.state?.from || "/checkout";
+  const redirectPath =
+    location.state?.from?.pathname ||
+    location.state?.from ||
+    "/";
 
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);

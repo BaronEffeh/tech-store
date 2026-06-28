@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Box,
@@ -11,7 +12,7 @@ import {
 } from "@mui/material";
 import { TextField, MenuItem } from "@mui/material";
 import { useCart } from "../../context/CartContext";
-import ProductDetails from "./ProductDetails";
+// import ProductDetails from "./ProductDetails";
 
 export function ProductSection({ products, initialCategory = "All Products" }) {
 
@@ -19,8 +20,9 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
 
   // const [selectedCategory, setSelectedCategory] = useState("All Products");
   const { addToCart } = useCart();
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  // const [selectedProduct, setSelectedProduct] = useState(null);
+  // const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("");
 
@@ -199,9 +201,12 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                   }
                 }}
                 onClick={() => {
-                  setSelectedProduct(product);
-                  setOpen(true);
+                  navigate(`/products/${product.id}`);
                 }}
+                // onClick={() => {
+                //   setSelectedProduct(product);
+                //   setOpen(true);
+                // }}
               >
                 {/* Image */}
                 <Box
@@ -283,17 +288,6 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                 </Box>
 
                 {/* Button */}
-                {/* <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToCart(product);
-                  }}
-                >
-                  Add to Cart
-                </Button> */}
-
                 <Button
                   fullWidth
                   variant="contained"
@@ -307,6 +301,20 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                     ? "Out of Stock"
                     : "Add to Cart"}
                 </Button>
+
+                {/* <Button
+                  fullWidth
+                  variant="contained"
+                  disabled={product.status === "Out of Stock"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(product);
+                  }}
+                >
+                  {product.status === "Out of Stock"
+                    ? "Out of Stock"
+                    : "Add to Cart"}
+                </Button> */}
                 </Box>
               </Paper>
             </Grid>
@@ -315,12 +323,12 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
         </Grid>
       </Container>
 
-      <ProductDetails
+      {/* <ProductDetails
         open={open}
         onClose={() => setOpen(false)}
         product={selectedProduct}
         onAdd={addToCart}
-      />
+      /> */}
     </Box>
   );
 }

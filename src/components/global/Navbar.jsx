@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -18,6 +18,20 @@ export function Navbar() {
   const { totalItems } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = () => {
+    const query = searchTerm.trim();
+
+    if (!query) return;
+
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+    setSearchTerm("");
+  };
+
+  const firstName =
+    user?.displayName?.trim()?.split(" ")[0] || "Account";
 
   return (
     <AppBar position="sticky" color="default" elevation={1}>
@@ -71,15 +85,40 @@ export function Navbar() {
             }}>
             Deals
           </Button>
-          {/* <Button>Laptops</Button>
-          <Button>Phones</Button>
-          <Button>Tablets</Button>
-          <Button>Accessories</Button>
-          <Button>Deals</Button> */}
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              bgcolor: "#fffefe",
+              px: 2,
+              borderRadius: 2,
+            }}
+          >
+            <IconButton
+              size="small"
+              onClick={handleSearch}
+              sx={{ mr: 0.5 }}
+            >
+              <Search color="disabled" />
+            </IconButton>
+
+            <InputBase
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSearch();
+                }
+              }}
+              sx={{ width: { xs: 120, md: 220 } }}
+            />
+          </Box>
+          {/* <Box
             sx={{
               display: "flex",
               alignItems: "center",
@@ -90,17 +129,28 @@ export function Navbar() {
           >
             <Search color="disabled" />
             <InputBase placeholder="Search products..." />
-          </Box>
+          </Box> */}
 
-          <IconButton
+          <Box
             onClick={() => navigate(user ? "/account" : "/auth")}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              cursor: "pointer",
+            }}
           >
             <AccountCircle />
-          </IconButton>
-
-          {/* <IconButton>
-            <AccountCircle />
-          </IconButton> */}
+            <Typography
+              variant="body2"
+              sx={{
+                display: { xs: "none", sm: "block" },
+                fontWeight: 500,
+              }}
+            >
+              {firstName}
+            </Typography>
+          </Box>
 
           {/* CART BADGE */}
           <IconButton onClick={() => navigate("/cart")}>
