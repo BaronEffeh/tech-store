@@ -45,7 +45,14 @@ const PAYMENT_STYLES = {
 
 /* ---------------- ORDER ROW ---------------- */
 
-function OrderRow({ order }) {
+// function OrderRow({ order }) {
+function OrderRow({
+    order,
+    onUpdateStatus,
+    onCancelOrder,
+    onViewInvoice,
+    onContactCustomer,
+}) {
   const [open, setOpen] = useState(false);
 
   const normalizedStatus =
@@ -252,6 +259,9 @@ function OrderRow({ order }) {
                 <Button
                   variant="contained"
                   disableElevation
+                  onClick={() =>
+                    onUpdateStatus(order)
+                  }
                   sx={{
                     bgcolor: "#0a0a0a",
                     color: "#fff",
@@ -266,6 +276,10 @@ function OrderRow({ order }) {
 
                 <Button
                   variant="outlined"
+                  onClick={() =>
+                    onViewInvoice(order)
+                    // handleViewInvoice(order)
+                  }
                   sx={{
                     borderColor: "#e5e7eb",
                     color: "#111827",
@@ -281,6 +295,9 @@ function OrderRow({ order }) {
 
                 <Button
                   variant="outlined"
+                  onClick={() =>
+                    onContactCustomer(order)
+                  }
                   sx={{
                     borderColor: "#e5e7eb",
                     color: "#111827",
@@ -296,6 +313,9 @@ function OrderRow({ order }) {
 
                 <Button
                   variant="outlined"
+                  onClick={() =>
+                    onCancelOrder(order)
+                  }
                   sx={{
                     borderColor: "#fecaca",
                     color: "#dc2626",
@@ -320,41 +340,49 @@ function OrderRow({ order }) {
 /* ---------------- MAIN LIST ---------------- */
 
 // export default function OrderList({ orders = mockOrders }) {
-export default function OrderList({ orders = [] }) {
+// export default function OrderList({ orders = [] }) {
+export default function OrderList({
+  orders = [],
+  totalOrders = 0,
+  onUpdateStatus,
+  onCancelOrder,
+  onViewInvoice,
+  onContactCustomer,
+}) {
   const [sortBy, setSortBy] = useState("all");
   const [page, setPage] = useState(0);
   const rowsPerPage = 7;
 
   /* ---------------- SORTING ---------------- */
-const sortedOrders = useMemo(() => {
-  const data = [...orders];
+  const sortedOrders = useMemo(() => {
+    const data = [...orders];
 
-  switch (sortBy) {    
-    case "newest":
-      return data.sort(
-        (a, b) =>
-          (b.createdAt?.seconds || 0) -
-          (a.createdAt?.seconds || 0)
-      );
+    switch (sortBy) {    
+      case "newest":
+        return data.sort(
+          (a, b) =>
+            (b.createdAt?.seconds || 0) -
+            (a.createdAt?.seconds || 0)
+        );
 
-    case "oldest":
-      return data.sort(
-        (a, b) =>
-          (a.createdAt?.seconds || 0) -
-          (b.createdAt?.seconds || 0)
-      );
+      case "oldest":
+        return data.sort(
+          (a, b) =>
+            (a.createdAt?.seconds || 0) -
+            (b.createdAt?.seconds || 0)
+        );
 
-    case "highest":
-      return data.sort((a, b) => b.total - a.total);
+      case "highest":
+        return data.sort((a, b) => b.total - a.total);
 
-    case "lowest":
-      return data.sort((a, b) => a.total - b.total);
+      case "lowest":
+        return data.sort((a, b) => a.total - b.total);
 
-    case "all":
-    default:
-      return data;
-  }
-}, [orders, sortBy]);
+      case "all":
+      default:
+        return data;
+    }
+  }, [orders, sortBy]);
 
   /* ---------------- PAGINATION ---------------- */
 
@@ -372,8 +400,19 @@ const sortedOrders = useMemo(() => {
         alignItems="center"
         sx={{ mb: 2 }}
       >
-        <Typography variant="body2" sx={{ color: "#6b7280" }}>
+        {/* <Typography variant="body2" sx={{ color: "#6b7280" }}>
           Showing {orders.length} orders
+        </Typography> */}
+
+        <Typography
+          variant="body2"
+          sx={{ color: "#6b7280" }}
+        >
+          Showing{" "}
+          <strong>{orders.length}</strong>
+          {" "}of{" "}
+          <strong>{totalOrders}</strong>
+          {" "}orders
         </Typography>
 
         <Box>
@@ -414,7 +453,15 @@ const sortedOrders = useMemo(() => {
       {/* LIST */}
       <Stack spacing={1.5}>
         {paginatedOrders.map((order) => (
-          <OrderRow key={order.id} order={order} />
+          // <OrderRow key={order.id} order={order} />
+          <OrderRow
+            key={order.id}
+            order={order}
+            onUpdateStatus={onUpdateStatus}
+            onCancelOrder={onCancelOrder}
+            onViewInvoice={onViewInvoice}
+            onContactCustomer={onContactCustomer}
+        />
         ))}
       </Stack>
 

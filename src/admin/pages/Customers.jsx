@@ -6,7 +6,6 @@ import CustomerStatCard from "../components/customers/CustomerStatCard";
 import CustomerFilters from "../components/customers/CustomerFilters";
 import CustomersList from "../components/customers/CustomersList";
 
-// import customers from "../data/customers";
 import { getCustomers } from "../../firebase/customers";
 
 import GroupsIcon from "@mui/icons-material/Groups";
@@ -70,39 +69,6 @@ export default function Customers() {
   /* =========================
      SEARCH + FILTER LOGIC
   ========================= */
-
-  // const filteredCustomers = customers.filter((customer) => {
-  //   // SEARCH
-  //   const matchesSearch =
-  //     customer.displayName.toLowerCase().includes(search.toLowerCase()) ||
-  //     customer.email.toLowerCase().includes(search.toLowerCase()) ||
-  //     customer.uid.toLowerCase().includes(search.toLowerCase());
-
-  //   // STATUS FILTER
-  //   const matchesStatus =
-  //     status === "All" || customer.status === status;
-
-  //   return matchesSearch && matchesStatus;
-  // });
-
-  // const searchTerm = search.toLowerCase();
-  //   const filteredCustomers = customers.filter((customer) => {
-  //     const matchesSearch =
-  //       (customer.displayName || "")
-  //         .toLowerCase()
-  //         .includes(searchTerm) ||
-  //       (customer.email || "")
-  //         .toLowerCase()
-  //         .includes(searchTerm) ||
-  //       (customer.uid || "")
-  //         .toLowerCase()
-  //         .includes(searchTerm);
-
-  //     const matchesStatus =
-  //       status === "All" || customer.status === status;
-
-  //     return matchesSearch && matchesStatus;
-  //   });
 
   const searchTerm = search.toLowerCase();
 

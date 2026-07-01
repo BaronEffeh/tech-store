@@ -16,6 +16,14 @@ import {
   Alert,
   Grid,
 } from "@mui/material";
+import Timeline from "@mui/lab/Timeline";
+import TimelineItem from "@mui/lab/TimelineItem";
+import TimelineSeparator from "@mui/lab/TimelineSeparator";
+import TimelineDot from "@mui/lab/TimelineDot";
+import TimelineConnector from "@mui/lab/TimelineConnector";
+import TimelineContent from "@mui/lab/TimelineContent";
+import TimelineOppositeContent from "@mui/lab/TimelineOppositeContent";
+
 import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -298,88 +306,6 @@ export default function AccountPage() {
             </Stack>
           </>
         )}
-        {/* <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="First Name"
-              fullWidth
-              value={form.firstName}
-              onChange={updateField("firstName")}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Last Name"
-              fullWidth
-              value={form.lastName}
-              onChange={updateField("lastName")}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              label="Phone Number"
-              fullWidth
-              value={form.phone}
-              onChange={updateField("phone")}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              label="Address"
-              fullWidth
-              value={form.address}
-              onChange={updateField("address")}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              label="City"
-              fullWidth
-              value={form.city}
-              onChange={updateField("city")}
-            />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              label="Bio"
-              fullWidth
-              multiline
-              rows={3}
-              value={form.bio}
-              onChange={updateField("bio")}
-            />
-          </Grid>
-        </Grid>
-
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{ mt: 3 }}
-        >
-          <Button
-            variant="contained"
-            onClick={handleSaveProfile}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Save Profile"}
-          </Button>
-
-          <Button
-            color="error"
-            variant="outlined"
-            onClick={() => {
-              logout();
-              navigate("/");
-            }}
-          >
-            Logout
-          </Button>
-        </Stack> */}
 
         <Divider sx={{ my: 4 }} />
 
@@ -498,6 +424,122 @@ export default function AccountPage() {
                     Items:{" "}
                     {order.items?.length || 0}
                   </Typography>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Typography
+                    fontWeight={600}
+                    sx={{ mb: 2 }}
+                  >
+                    Order Timeline
+                  </Typography>
+
+                  {order.statusHistory?.length ? (
+                    <Timeline
+                      sx={{
+                        p: 0,
+                        m: 0,
+                      }}
+                    >
+                      {order.statusHistory.map((item, index) => (
+                        <TimelineItem key={index}>
+                          <TimelineOppositeContent
+                            sx={{
+                              flex: 0.28,
+                              fontSize: 12,
+                              color: "text.secondary",
+                            }}
+                          >
+                            {item.timestamp?.toDate
+                              ? item.timestamp
+                                  .toDate()
+                                  .toLocaleDateString()
+                              : ""}
+                          </TimelineOppositeContent>
+
+                          <TimelineSeparator>
+                            <TimelineDot
+                              color={
+                                item.status === "Delivered"
+                                  ? "success"
+                                  : item.status === "Cancelled"
+                                  ? "error"
+                                  : item.status === "Shipped"
+                                  ? "primary"
+                                  : "warning"
+                              }
+                            />
+
+                            {index !==
+                              order.statusHistory.length - 1 && (
+                              <TimelineConnector />
+                            )}
+                          </TimelineSeparator>
+
+                          <TimelineContent>
+
+                            <Typography fontWeight={600}>
+                              {item.status}
+                            </Typography>
+
+                            {item.status === "Shipped" &&
+                              item.shipping && (
+                                <Box sx={{ mt: 1 }}>
+
+                                  {item.shipping.courier && (
+                                    <Typography
+                                      variant="body2"
+                                      color="text.secondary"
+                                    >
+                                      🚚 Courier:{" "}
+                                      {item.shipping.courier}
+                                    </Typography>
+                                  )}
+
+                                  {item.shipping.trackingNumber && (
+                                    <Typography
+                                      variant="body2"
+                                      color="text.secondary"
+                                    >
+                                      📦 Tracking:
+                                      {" "}
+                                      {
+                                        item.shipping
+                                          .trackingNumber
+                                      }
+                                    </Typography>
+                                  )}
+
+                                  {item.shipping
+                                    .estimatedDelivery && (
+                                    <Typography
+                                      variant="body2"
+                                      color="text.secondary"
+                                    >
+                                      📅 Estimated Delivery:
+                                      {" "}
+                                      {
+                                        item.shipping
+                                          .estimatedDelivery
+                                      }
+                                    </Typography>
+                                  )}
+
+                                </Box>
+                              )}
+
+                          </TimelineContent>
+                        </TimelineItem>
+                      ))}
+                    </Timeline>
+                  ) : (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                    >
+                      No timeline available.
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             ))}
