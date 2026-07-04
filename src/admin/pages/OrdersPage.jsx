@@ -17,6 +17,7 @@ import {
     subscribeToOrders,
     updateOrderStatus,
     cancelOrder,
+    markOrderAsRead,
 } from "../../firebase/orders";
 
 import OrdersHeader from "../components/orders/OrdersHeader";
@@ -112,7 +113,9 @@ export default function OrdersPage() {
     });
   }, [orders, filters]);
 
-  const handleUpdateStatus = (order) => {
+  const handleUpdateStatus = async (order) => {
+  // const handleUpdateStatus = (order) => {
+    await markOrderAsRead(order.id);
     setSelectedOrder(order);
     setManagementDialogOpen(true);
   };

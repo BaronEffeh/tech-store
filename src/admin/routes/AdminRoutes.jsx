@@ -7,6 +7,7 @@ import Customers from "../pages/Customers";
 import Analytics from "../pages/Analytics";
 import SettingsPanel from "../pages/SettingsPanel";
 import AdminLayout from "../components/AdminLayout";
+import Notifications from "../pages/Notifications";
 
 export default function AdminRoutes() {
   return (
@@ -19,6 +20,7 @@ export default function AdminRoutes() {
         <Route path="/customers" element={<Customers />}/>
         <Route path="/analytics" element={<Analytics />}/>
         <Route path="settings" element={<SettingsPanel />}/>
+        <Route path="/admin/notifications" element={<Notifications />}/>
         {/* <Route path="/reviews" element={<Reviews />} /> */}
       </Routes>
     </AdminLayout>

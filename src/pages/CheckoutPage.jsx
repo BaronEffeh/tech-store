@@ -139,6 +139,7 @@ export default function CheckoutPage() {
         total,
 
         status: "Pending",
+        isNew: true,
 
         createdAt: serverTimestamp(),
       });

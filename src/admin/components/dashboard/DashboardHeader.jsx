@@ -1,7 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import { Box, Typography, InputBase, IconButton } from "@mui/material";
 import { Search, Notifications } from "@mui/icons-material";
+import { Badge } from "@mui/material";
+
+import useNewOrdersCount from "../../../firebase/hooks/useNewOrdersCount";
 
 export default function DashboardHeader() {
+  const newOrders = useNewOrdersCount();
+  const navigate = useNavigate();
+
   return (
     <>
     <Box
@@ -36,8 +43,18 @@ export default function DashboardHeader() {
           <InputBase placeholder="Search..." />
         </Box>
 
-        <IconButton>
-          <Notifications />
+        <IconButton
+            onClick={() =>
+              navigate("/admin/notifications")
+            }
+          >
+          <Badge
+              badgeContent={newOrders}
+              color="error"
+              max={99}
+          >
+            <Notifications />
+          </Badge>
         </IconButton>
       </Box>
     </Box>

@@ -351,7 +351,7 @@ export default function OrderList({
 }) {
   const [sortBy, setSortBy] = useState("all");
   const [page, setPage] = useState(0);
-  const rowsPerPage = 7;
+  const rowsPerPage = 10;
 
   /* ---------------- SORTING ---------------- */
   const sortedOrders = useMemo(() => {

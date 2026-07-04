@@ -106,23 +106,7 @@ const companyLinks = {
               >
                 {label}
               </Typography>
-            ))}
-            {/* {["Laptops", "Phones", "Tablets", "Accessories", "Deals"].map(
-              (item) => (
-                <Typography
-                  key={item}
-                  variant="body2"
-                  sx={{ mb: 1, 
-                    color: "#cbd5e1", 
-                    cursor: "pointer",
-                    "&:hover": {
-                        color: "#fff"
-                    } }}
-                >
-                  {item}
-                </Typography>
-              )
-            )} */}
+            ))}         
           </Grid>
 
           {/* Support */}
@@ -144,27 +128,7 @@ const companyLinks = {
               >
                 {label}
               </Typography>
-            ))}
-            {/* {[
-              "Contact Us",
-              "FAQ",
-              "Shipping Info",
-              "Returns",
-              "Warranty"
-            ].map((item) => (
-              <Typography
-                key={item}
-                variant="body2"
-                sx={{ mb: 1, 
-                    color: "#cbd5e1", 
-                    cursor: "pointer",
-                    "&:hover": {
-                        color: "#fff"
-                    } }}
-              >
-                {item}
-              </Typography>
-            ))} */}
+            ))}           
           </Grid>
 
           {/* Company */}
@@ -186,26 +150,7 @@ const companyLinks = {
               >
                 {label}
               </Typography>
-            ))}
-            {/* {[
-              "About Us",
-              "Careers",
-              "Privacy Policy",
-              "Terms of Service"
-            ].map((item) => (
-              <Typography
-                key={item}
-                variant="body2"
-                sx={{ mb: 1, 
-                    color: "#cbd5e1", 
-                    cursor: "pointer",
-                    "&:hover": {
-                        color: "#fff"
-                    } }}
-              >
-                {item}
-              </Typography>
-            ))} */}
+            ))}            
           </Grid>
         </Grid>
 
@@ -219,7 +164,15 @@ const companyLinks = {
           }}
         >
           <Typography variant="body2" color="#94a3b8" py={3}>
-            © {new Date().getFullYear()} TechStore. All rights reserved.
+            © {new Date().getFullYear()} TechStore. All rights reserved. 
+            <span 
+              onClick={() => navigate("/admin")}
+              sx={{ cursor: "pointer" }}
+            >.</span>
+            <Typography
+              sx={{ cursor: "pointer" }}
+              onClick={() => navigate("/admin")} 
+            >.</Typography>
           </Typography>
         </Box>
       </Container>
