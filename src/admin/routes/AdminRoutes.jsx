@@ -20,7 +20,7 @@ export default function AdminRoutes() {
         <Route path="/customers" element={<Customers />}/>
         <Route path="/analytics" element={<Analytics />}/>
         <Route path="settings" element={<SettingsPanel />}/>
-        <Route path="/admin/notifications" element={<Notifications />}/>
+        <Route path="/notifications" element={<Notifications />}/>
         {/* <Route path="/reviews" element={<Reviews />} /> */}
       </Routes>
     </AdminLayout>

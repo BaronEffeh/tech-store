@@ -13,6 +13,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 export default function NotificationCard({
   notification,
   onOpen,
+  onDelete,
 }) {
   return (
     <Card
@@ -98,6 +99,14 @@ export default function NotificationCard({
               }
             >
               Open
+            </Button>
+
+            <Button
+              color="error"
+              variant="outlined"
+              onClick={() => onDelete(notification)}
+            >
+              Hide
             </Button>
           </Box>
         </Stack>

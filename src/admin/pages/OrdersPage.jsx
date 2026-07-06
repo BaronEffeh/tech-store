@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+
 import {
   Box,
   CircularProgress,
@@ -32,6 +34,7 @@ import OrderManagementDialog from "../components/orders/OrderManagementDialog";
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   const [selectedOrder, setSelectedOrder] =
     useState(null);
@@ -77,6 +80,9 @@ export default function OrdersPage() {
       });
     return () => unsubscribe();
   }, []);
+
+  const selectedOrderId =
+    location.state?.orderId;
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -232,6 +238,7 @@ export default function OrdersPage() {
         <OrderList
           orders={filteredOrders}
           totalOrders={orders.length}
+          selectedOrderId={selectedOrderId}
           onUpdateStatus={handleUpdateStatus}
           onCancelOrder={handleCancelOrder}
           onViewInvoice={handleViewInvoice}

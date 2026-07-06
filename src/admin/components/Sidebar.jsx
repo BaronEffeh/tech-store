@@ -125,7 +125,7 @@ export default function Sidebar() {
                   {item.name === "Orders" ? (
                     <Badge
                       badgeContent={newOrders}
-                      color="error"
+                      color="success"
                       max={99}
                     >
                       {item.icon}

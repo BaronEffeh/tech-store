@@ -1,106 +1,188 @@
+import { useNavigate } from "react-router-dom";
+import { markOrderAsRead, hideNotification } from "../../firebase/orders";
+
 import {
-  // Box,
-  // Typography,
-  // CircularProgress,
-  // Stack,
+  Box,
+  Typography,
+  CircularProgress,
+  Stack,
 } from "@mui/material";
 
-// import {
-//   collection,
-//   query,
-// //   where,
-//   orderBy,
-//   onSnapshot,
-// } from "firebase/firestore";
+import {
+  collection,
+  query,
+//   where,
+  orderBy,
+  onSnapshot,
+} from "firebase/firestore";
 
-// import {
-//   useEffect,
-//   useMemo,
-//   useState,
-// } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-// import { db } from "../../firebase/config";
+import { db } from "../../firebase/config";
 
-// import NotificationCard from "../components/notifications/NotificationCard";
-// import NotificationFilters from "../components/notifications/NotificationFilters";
-// import NotificationEmpty from "../components/notifications/NotificationEmpty";
+import NotificationCard from "../components/notifications/NotificationCard";
+import NotificationFilters from "../components/notifications/NotificationFilters";
+import NotificationEmpty from "../components/notifications/NotificationEmpty";
 
 export default function Notifications() {
-  // const [notifications, setNotifications] =
-  //   useState([]);
+  const [notifications, setNotifications] = useState([]);
 
-  // const [loading, setLoading] =
-  //   useState(true);
+  const navigate = useNavigate();
 
-  // const [search, setSearch] =
-  //   useState("");
+  const [loading, setLoading] =
+    useState(true);
 
-  // const [filter, setFilter] =
-  //   useState("all");
+  const [search, setSearch] =
+    useState("");
 
-  // useEffect(() => {
-  //   const q = query(
-  //     collection(db, "orders"),
-  //     orderBy("createdAt", "desc")
-  //   );
+  const [filter, setFilter] =
+    useState("all");
 
-  //   const unsubscribe = onSnapshot(
-  //     q,
-  //     (snapshot) => {
-  //       setNotifications(
-  //         snapshot.docs.map((doc) => ({
-  //           id: doc.id,
-  //           ...doc.data(),
-  //         }))
-  //       );
+  useEffect(() => {
+    const q = query(
+      collection(db, "orders"),
+      orderBy("createdAt", "desc")
+    );
 
-  //       setLoading(false);
-  //     }
-  //   );
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setNotifications(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+        );
 
-  //   return unsubscribe;
-  // }, []);
+        setLoading(false);
+      }
+    );
 
-  // const filtered =
-  //   useMemo(() => {
-  //     return notifications.filter(
-  //       (order) => {
-  //         const matchesSearch =
-  //           order.customer?.name
-  //             ?.toLowerCase()
-  //             .includes(
-  //               search.toLowerCase()
-  //             );
+    return unsubscribe;
+  }, []);
 
-  //         const matchesFilter =
-  //           filter === "all"
-  //             ? true
-  //             : filter === "new"
-  //             ? order.isNew
-  //             : !order.isNew;
 
-  //         return (
-  //           matchesSearch &&
-  //           matchesFilter
-  //         );
-  //       }
-  //     );
-  //   }, [
-  //     notifications,
-  //     search,
-  //     filter,
-  //   ]);
+
+  const filtered =
+    useMemo(() => {
+      return notifications.filter(
+        (order) => {
+
+          if (order.hidden) return false;
+          
+          const keyword = search.toLowerCase();
+
+          const matchesSearch = [
+            order.id,
+            order.customer?.name,
+            order.customer?.email,
+            order.customer?.phone,
+          ]
+          .filter(Boolean)
+          .some(value =>
+            String(value)
+                .toLowerCase()
+                .includes(keyword)
+          );
+          // const matchesSearch =
+          //   order.customer?.name
+          //     ?.toLowerCase()
+          //     .includes(
+          //       search.toLowerCase()
+          //     );
+
+          const matchesFilter =
+            filter === "all"
+              ? true
+              : filter === "new"
+              ? order.isNew
+              : !order.isNew;
+
+          return (
+            matchesSearch &&
+            matchesFilter
+          );
+        }
+      );
+    }, [
+      notifications,
+      search,
+      filter,
+    ]);
 
   // const handleOpen =
   //   (notification) => {
   //     console.log(notification);
+  const handleOpen = async (notification) => {
+    await markOrderAsRead(notification.id);
 
-  //     // Next step:
-  //     // Mark notification as read
-  //     // Open Order Management Dialog
-  //   };
+    navigate("/admin/orders", {
+        state: {
+            orderId: notification.id,
+        },
+    });
+  };
+
+  const handleDelete = async (notification) => {
+    await hideNotification(notification.id);
+  };
+
+      // Next step:
+      // Mark notification as read
+      // Open Order Management Dialog
+    // };
 
   return (
-    <div>Notifivations notification Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam atque velit commodi ex, dolor eligendi repudiandae explicabo cumque at beatae. Corrupti soluta quae aperiam autem, beatae esse eius voluptas provident.</div>
+    <Box sx={{ml: 5}}>
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        mb={1}
+      >
+        Notifications
+      </Typography>
+
+      <Typography
+        color="text.secondary"
+        mb={4}
+      >
+        Stay updated with new customer orders.
+      </Typography>
+
+      <NotificationFilters
+        search={search}
+        setSearch={setSearch}
+        filter={filter}
+        setFilter={setFilter}
+      />
+
+      {loading ? (
+        <Box
+          textAlign="center"
+          py={10}
+        >
+          <CircularProgress />
+        </Box>
+      ) : filtered.length === 0 ? (
+        <NotificationEmpty />
+      ) : (
+        <Stack spacing={2}>
+          {filtered.map(
+            (notification) => (
+              <NotificationCard
+                key={notification.id}
+                notification={notification}
+                onOpen={handleOpen}
+                onDelete={handleDelete}
+              />
+            )
+          )}
+        </Stack>
+      )}
+    </Box>
   );
 }

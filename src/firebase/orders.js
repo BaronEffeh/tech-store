@@ -224,3 +224,14 @@ export async function markOrderAsRead(orderId) {
       console.error(err);
   }
 }
+
+export async function hideNotification(id) {
+
+    await updateDoc(
+        doc(db, "orders", id),
+        {
+            hidden: true,
+        }
+    );
+
+}

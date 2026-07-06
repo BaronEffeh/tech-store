@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import {
   Box,
+  Badge,
   Button,
   Chip,
   Collapse,
@@ -55,6 +56,10 @@ function OrderRow({
 }) {
   const [open, setOpen] = useState(false);
 
+  // const [open, setOpen] = useState(
+  //   order.id === selectedOrderId
+  // );
+
   const normalizedStatus =
     order.status
       ? order.status.charAt(0).toUpperCase() +
@@ -87,7 +92,33 @@ function OrderRow({
       >
         <Box sx={{ flex: 1 }}>
           <Stack direction="row" spacing={1} sx={{ mb: 0.5, alignItems: "center", flexWrap: "wrap" }}>
-            <Typography sx={{ fontWeight: 600 }}>#{order.id}</Typography>
+            {/* <Typography sx={{ fontWeight: 600 }}>#{order.id}</Typography> */}
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+            >
+              <Badge
+                color="success"
+                variant="dot"
+                invisible={!order.isNew}
+              >
+                <Typography sx={{ fontWeight: 600 }}>
+                  #{order.id}
+                </Typography>
+              </Badge>
+
+              {order.isNew && (
+                <Chip
+                  label="NEW"
+                  color="success"
+                  size="small"
+                  sx={{
+                    fontWeight: 700,
+                  }}
+                />
+              )}
+            </Stack>
 
             <Chip
               size="small"
