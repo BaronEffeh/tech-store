@@ -39,6 +39,9 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] =
     useState(null);
 
+  const [expandedOrderId, setExpandedOrderId] =
+    useState(location.state?.orderId || null);
+
   // const [selectedOrder, setSelectedOrder] =
   //   useState(null);
 
@@ -83,6 +86,12 @@ export default function OrdersPage() {
 
   const selectedOrderId =
     location.state?.orderId;
+
+  useEffect(() => {
+    if (location.state?.orderId) {
+        setExpandedOrderId(location.state.orderId);
+    }
+  }, [location.state]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -238,12 +247,13 @@ export default function OrdersPage() {
         <OrderList
           orders={filteredOrders}
           totalOrders={orders.length}
+          expandedOrderId={expandedOrderId}
           selectedOrderId={selectedOrderId}
           onUpdateStatus={handleUpdateStatus}
           onCancelOrder={handleCancelOrder}
           onViewInvoice={handleViewInvoice}
           onContactCustomer={handleContactCustomer}
-      />
+        />
         </>
       )}
 

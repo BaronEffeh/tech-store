@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, } from "react";
 import {
   Box,
   Badge,
@@ -49,12 +49,30 @@ const PAYMENT_STYLES = {
 // function OrderRow({ order }) {
 function OrderRow({
     order,
+    expandedOrderId,
     onUpdateStatus,
     onCancelOrder,
     onViewInvoice,
     onContactCustomer,
 }) {
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
+
+  const [open, setOpen] = useState(
+    order.id === expandedOrderId
+  );
+
+  useEffect(() => {
+    if (order.id === expandedOrderId) {
+      setOpen(true);
+
+      document
+        .getElementById(`order-${order.id}`)
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+    }
+  }, [expandedOrderId, order.id]);
 
   // const [open, setOpen] = useState(
   //   order.id === selectedOrderId
@@ -77,6 +95,7 @@ function OrderRow({
 
   return (
     <Box
+      id={`order-${order.id}`}
       sx={{
         border: "1px solid #e5e7eb",
         borderRadius: 2,
@@ -99,7 +118,7 @@ function OrderRow({
               alignItems="center"
             >
               <Badge
-                color="success"
+                color="error"
                 variant="dot"
                 invisible={!order.isNew}
               >
@@ -111,7 +130,7 @@ function OrderRow({
               {order.isNew && (
                 <Chip
                   label="NEW"
-                  color="success"
+                  color="error"
                   size="small"
                   sx={{
                     fontWeight: 700,
@@ -375,6 +394,7 @@ function OrderRow({
 export default function OrderList({
   orders = [],
   totalOrders = 0,
+  expandedOrderId,
   onUpdateStatus,
   onCancelOrder,
   onViewInvoice,
@@ -488,6 +508,7 @@ export default function OrderList({
           <OrderRow
             key={order.id}
             order={order}
+            expandedOrderId={expandedOrderId}
             onUpdateStatus={onUpdateStatus}
             onCancelOrder={onCancelOrder}
             onViewInvoice={onViewInvoice}

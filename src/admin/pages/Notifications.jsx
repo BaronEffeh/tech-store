@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { isSameDay, isThisWeek } from "date-fns";
 import { markOrderAsRead, hideNotification } from "../../firebase/orders";
 
 import {
@@ -95,12 +96,52 @@ export default function Notifications() {
           //       search.toLowerCase()
           //     );
 
-          const matchesFilter =
-            filter === "all"
-              ? true
-              : filter === "new"
-              ? order.isNew
-              : !order.isNew;
+          const matchesFilter = (() => {
+            const now = new Date();
+            const created = order.createdAt?.toDate();
+
+              switch (filter) {
+                case "all":
+                  return true;
+
+                case "new":
+                  return order.isNew === true;
+
+                case "read":
+                  return order.isNew === false;
+
+                case "today":
+                  return created && isSameDay(created, now);
+
+                case "week":
+                  return created && isThisWeek(created);
+
+                case "pending":
+                  return order.status === "Pending";
+
+                case "processing":
+                  return order.status === "Processing";
+
+                case "shipped":
+                  return order.status === "Shipped";
+
+                case "delivered":
+                  return order.status === "Delivered";
+
+                case "cancelled":
+                  return order.status === "Cancelled";
+
+                default:
+                  return true;
+              }
+          })();
+
+          // // const matchesFilter =
+          // //   filter === "all"
+          // //     ? true
+          // //     : filter === "new"
+          // //     ? order.isNew
+          // //     : !order.isNew;
 
           return (
             matchesSearch &&

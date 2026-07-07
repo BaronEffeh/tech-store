@@ -25,7 +25,7 @@ export default function NotificationFilters({
     >
       <TextField
         fullWidth
-        placeholder="Search customer..."
+        placeholder="Search by order ID, customer name, or email"
         value={search}
         onChange={(e) =>
           setSearch(e.target.value)
@@ -42,7 +42,7 @@ export default function NotificationFilters({
         }}
       >
         <MenuItem value="all">
-          All
+          All Notifications
         </MenuItem>
 
         <MenuItem value="new">
@@ -52,6 +52,45 @@ export default function NotificationFilters({
         <MenuItem value="read">
           Read
         </MenuItem>
+
+        <MenuItem value="today">
+          Today
+        </MenuItem>
+
+        <MenuItem value="week">
+          This Week
+        </MenuItem>
+
+        <MenuItem value="pending">
+          Pending Orders
+        </MenuItem>
+
+        <MenuItem value="processing">
+          Processing
+        </MenuItem>
+
+        <MenuItem value="shipped">
+          Shipped
+        </MenuItem>
+
+        <MenuItem value="delivered">
+          Delivered
+        </MenuItem>
+
+        <MenuItem value="cancelled">
+          Cancelled
+        </MenuItem>
+        {/* <MenuItem value="all">
+          All
+        </MenuItem>
+
+        <MenuItem value="new">
+          New
+        </MenuItem>
+
+        <MenuItem value="read">
+          Read
+        </MenuItem> */}
       </Select>
     </Stack>
   );

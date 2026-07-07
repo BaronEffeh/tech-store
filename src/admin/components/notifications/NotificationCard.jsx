@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import { formatDistanceToNow } from "date-fns";
 
 export default function NotificationCard({
   notification,
@@ -86,9 +87,22 @@ export default function NotificationCard({
               variant="caption"
               color="text.secondary"
             >
-              Order #
+              Order ID: #
               {notification.id.slice(0, 8)}
             </Typography>
+
+            <Typography
+              variant="caption"
+              color="text.secondary"
+            >
+              {notification.createdAt
+                ? formatDistanceToNow(
+                    notification.createdAt.toDate(),
+                    { addSuffix: true }
+                  )
+                : "Just now"}
+            </Typography>
+            
           </Stack>
 
           <Box>
