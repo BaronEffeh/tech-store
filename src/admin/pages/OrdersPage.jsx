@@ -42,6 +42,8 @@ export default function OrdersPage() {
   const [expandedOrderId, setExpandedOrderId] =
     useState(location.state?.orderId || null);
 
+  const customerId = location.state?.customerId;
+
   // const [selectedOrder, setSelectedOrder] =
   //   useState(null);
 
@@ -92,41 +94,80 @@ export default function OrdersPage() {
         setExpandedOrderId(location.state.orderId);
     }
   }, [location.state]);
+  
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      const search = filters.query.trim().toLowerCase();
 
-      const matchesQuery =
-        search === "" ||
-        [
-          order.id,
-          order.customer?.name,
-          order.customer?.email,
-          order.customer?.phone,
-        ]
-          .filter(Boolean)
-          .some((value) =>
-            String(value)
-              .toLowerCase()
-              .includes(search)
-          );
+  // Filter by customer if we came from the Customers page
+  if (customerId && order.userId !== customerId) {
+    return false;
+  }
 
-      const matchesStatus =
-        filters.status === "All" ||
-        order.status === filters.status;
+  const search = filters.query.trim().toLowerCase();
 
-      const matchesPayment =
-        filters.payment === "All" ||
-        order.paymentStatus === filters.payment;
-
-      return (
-        matchesQuery &&
-        matchesStatus &&
-        matchesPayment
+  const matchesQuery =
+    search === "" ||
+    [
+      order.id,
+      order.customer?.name,
+      order.customer?.email,
+      order.customer?.phone,
+    ]
+      .filter(Boolean)
+      .some((value) =>
+        String(value)
+          .toLowerCase()
+          .includes(search)
       );
-    });
-  }, [orders, filters]);
+
+  const matchesStatus =
+    filters.status === "All" ||
+    order.status === filters.status;
+
+  const matchesPayment =
+    filters.payment === "All" ||
+    order.paymentStatus === filters.payment;
+
+  return (
+    matchesQuery &&
+    matchesStatus &&
+    matchesPayment
+  );
+});
+    // return orders.filter((order) => {
+    //   const search = filters.query.trim().toLowerCase();
+
+    //   const matchesQuery =
+    //     search === "" ||
+    //     [
+    //       order.id,
+    //       order.customer?.name,
+    //       order.customer?.email,
+    //       order.customer?.phone,
+    //     ]
+    //       .filter(Boolean)
+    //       .some((value) =>
+    //         String(value)
+    //           .toLowerCase()
+    //           .includes(search)
+    //       );
+
+    //   const matchesStatus =
+    //     filters.status === "All" ||
+    //     order.status === filters.status;
+
+    //   const matchesPayment =
+    //     filters.payment === "All" ||
+    //     order.paymentStatus === filters.payment;
+
+    //   return (
+    //     matchesQuery &&
+    //     matchesStatus &&
+    //     matchesPayment
+    //   );
+    // });
+  }, [orders, filters, customerId]);
 
   const handleUpdateStatus = async (order) => {
   // const handleUpdateStatus = (order) => {
@@ -222,6 +263,18 @@ export default function OrdersPage() {
       <OrdersHeader />
 
       <OrderStats orders={filteredOrders} />
+
+      {customerId && (
+        <Typography
+          sx={{
+            mb: 2,
+            color: "primary.main",
+            fontWeight: 600,
+          }}
+        >
+          Showing orders for the selected customer
+        </Typography>
+      )}
 
       <OrderFilters
         filters={filters}

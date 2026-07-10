@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   Paper,
@@ -32,6 +33,7 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 
 export default function CustomersList({ customers }) {
   const [expanded, setExpanded] = useState(null);
+  const navigate = useNavigate();
 
   const handleExpand = (id) => {
     setExpanded(expanded === id ? null : id);
@@ -486,8 +488,15 @@ export default function CustomersList({ customers }) {
                       flexWrap: "wrap"
                     }}
                   >
+                    {/* <Button
+                      variant="contained" */}
                     <Button
                       variant="contained"
+                      onClick={() =>
+                          window.open(
+                              `mailto:${customer.email}`
+                          )
+                      }
                       startIcon={<EmailOutlinedIcon />}
                       sx={{
                         bgcolor: "#020617",
@@ -519,6 +528,26 @@ export default function CustomersList({ customers }) {
                     <Button
                       variant="outlined"
                       startIcon={<VisibilityOutlinedIcon />}
+                      onClick={() =>
+                        navigate("/admin/orders", {
+                          state: {
+                            customerId: customer.uid,
+                          },
+                        })
+                      }
+                      sx={{
+                        borderRadius: 3,
+                        textTransform: "none",
+                        borderColor: "#d1d5db",
+                        color: "#111827",
+                      }}
+                    >
+                      View All Orders
+                    </Button>
+
+                    {/* <Button
+                      variant="outlined"
+                      startIcon={<VisibilityOutlinedIcon />}
                       sx={{
                         borderRadius: 3,
                         textTransform: "none",
@@ -527,7 +556,7 @@ export default function CustomersList({ customers }) {
                       }}
                     >
                       View All Orders
-                    </Button>
+                    </Button> */}
 
                     <Button
                       variant="outlined"
