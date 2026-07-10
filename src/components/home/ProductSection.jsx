@@ -111,7 +111,17 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
 
 
   return (
-    <Box sx={{px: 4}}>
+    <Box
+      sx={{
+        px: {
+          xs: 2,
+          sm: 2,
+          md: 3,
+          lg: 4,
+        },
+      }}
+    >
+    {/* <Box sx={{px: 4}}> */}
       {/* Categories */}
       <Container sx={{ py: 3 }}>
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
@@ -182,14 +192,23 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
 
       {/* Products Grid */}
       <Container>
-        <Grid container spacing={3}>
+        <Grid container spacing={{ xs: 2, md: 2.5 }}>
+        {/* <Grid container spacing={3}> */}
           {filteredProducts.length === 0 ? (
             <Typography textAlign="center" mt={5}>
               No products found in this category.
             </Typography>
           ) : (
           filteredProducts.map((product) => (
-            <Grid item xs={12} sm={6} md={3} key={product.id}>
+            // <Grid item xs={12} sm={6} md={3} key={product.id}>
+            <Grid
+              item
+              xs={6}
+              sm={6}
+              md={4}
+              lg={2}
+              key={product.id}
+            >
               <Paper
                 sx={{
                   // p: 2,
@@ -221,7 +240,13 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                     alt={product.name}
                     sx={{
                       width: "100%",
-                      height: 230,
+                      // height: 230,
+                      height: {
+                        xs: 180,
+                        sm: 200,
+                        md: 180,
+                        lg: 170,
+                      },
                       objectFit: "cover",
                       borderRadius: "10px 10px 0 0",
                     }}
@@ -247,10 +272,17 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                 </Box>
 
                 {/* Name */}
-                <Box sx={{p: 2, pt: 0}}>
-                <Typography variant="body1" fontWeight="bold" gutterBottom>
-                  {product.name}
-                </Typography>
+                <Box sx={{p: 1.5, pt: 0}}>
+                  <Typography
+                    variant="body2"
+                    fontWeight={600}
+                    gutterBottom
+                    sx={{
+                      minHeight: 40,
+                    }}
+                  >
+                    {product.name}
+                  </Typography>
 
                 {/* Rating */}
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
