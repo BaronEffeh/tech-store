@@ -8,21 +8,68 @@ import {
   Paper,
   Typography,
   Chip,
-  Rating
+  // Rating
 } from "@mui/material";
-import { TextField, MenuItem } from "@mui/material";
+import { TextField, MenuItem, Skeleton } from "@mui/material";
 import { useCart } from "../../context/CartContext";
+import ProductPlaceholder from "../../assets/No_Image_Placeholder.svg.webp";
 // import ProductDetails from "./ProductDetails";
+
+function ProductImage({ src, alt }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  const placeholder = ProductPlaceholder;
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: {
+          xs: 180,
+          sm: 200,
+          md: 180,
+          lg: 170,
+        },
+        position: "relative",
+      }}
+    >
+      {!loaded && (
+        <Skeleton
+          variant="rectangular"
+          width="100%"
+          height="100%"
+        />
+      )}
+
+      <Box
+        component="img"
+        src={error ? placeholder : src}
+        alt={alt}
+        onLoad={() => setLoaded(true)}
+        onError={() => {
+          setError(true);
+          setLoaded(true);
+        }}
+        sx={{
+          display: loaded ? "block" : "none",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          borderRadius: "10px 10px 0 0",
+        }}
+      />
+    </Box>
+  );
+}
 
 export function ProductSection({ products, initialCategory = "All Products" }) {
 
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
-  // const [selectedCategory, setSelectedCategory] = useState("All Products");
   const { addToCart } = useCart();
   const navigate = useNavigate();
-  // const [selectedProduct, setSelectedProduct] = useState(null);
-  // const [open, setOpen] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("");
 
@@ -49,14 +96,14 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
   // ];
 
   const filteredProducts = products
-  // 1. Category filter
+  // Category filter
   .filter((product) =>
     selectedCategory === "All Products"
       ? true
       : product.category?.name === selectedCategory
   )
 
-  // 2. Search filter
+  // Search filter
   .filter((product) => {
     const queryWords = searchQuery
       .toLowerCase()
@@ -74,13 +121,6 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
       ${product.tag || ""}
       ${specsString}
     `.toLowerCase();
-
-    // const searchableText = `
-    //   ${product.name}
-    //   ${product.category?.name}
-    //   ${product.tag || ""}
-    //   ${specsString}
-    // `.toLowerCase();
 
     let matchCount = 0;
 
@@ -121,7 +161,6 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
         },
       }}
     >
-    {/* <Box sx={{px: 4}}> */}
       {/* Categories */}
       <Container sx={{ py: 3 }}>
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
@@ -131,10 +170,6 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
               variant={selectedCategory === cat ? "contained" : "outlined"}
               sx={{ borderRadius: 2 }}
               onClick={() => setSelectedCategory(cat)}
-              // onClick={() => {
-              //   setSelectedCategory(cat);
-              //   window.scrollTo({ top: 0, behavior: "smooth" });
-              // }}
             >
               {cat}
             </Button>
@@ -193,14 +228,12 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
       {/* Products Grid */}
       <Container>
         <Grid container spacing={{ xs: 2, md: 2.5 }}>
-        {/* <Grid container spacing={3}> */}
           {filteredProducts.length === 0 ? (
             <Typography textAlign="center" mt={5}>
               No products found in this category.
             </Typography>
           ) : (
           filteredProducts.map((product) => (
-            // <Grid item xs={12} sm={6} md={3} key={product.id}>
             <Grid
               item
               xs={6}
@@ -212,6 +245,10 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
               <Paper
                 sx={{
                   // p: 2,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
                   borderRadius: 3,
                   transition: "0.3s",
                   "&:hover": {
@@ -222,10 +259,6 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                 onClick={() => {
                   navigate(`/products/${product.id}`);
                 }}
-                // onClick={() => {
-                //   setSelectedProduct(product);
-                //   setOpen(true);
-                // }}
               >
                 {/* Image */}
                 <Box
@@ -234,7 +267,11 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                     mb: 2
                   }}
                 >
-                  <Box
+                  <ProductImage
+                    src={product.image}
+                    alt={product.name}
+                  />
+                  {/* <Box
                     component="img"
                     src={product.image}
                     alt={product.name}
@@ -250,7 +287,7 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                       objectFit: "cover",
                       borderRadius: "10px 10px 0 0",
                     }}
-                  />
+                  /> */}
 
                   {product.tag && (
                     <Chip
@@ -272,20 +309,31 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                 </Box>
 
                 {/* Name */}
-                <Box sx={{p: 1.5, pt: 0}}>
+                <Box
+                  sx={{
+                    p: 1.5,
+                    pt: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    flexGrow: 1,
+                  }}
+                >
                   <Typography
                     variant="body2"
                     fontWeight={600}
                     gutterBottom
                     sx={{
-                      minHeight: 40,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      minHeight: 24,
                     }}
                   >
                     {product.name}
                   </Typography>
 
                 {/* Rating */}
-                <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                {/* <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <Rating
                     value={product.rating}
                     precision={0.5}
@@ -299,10 +347,10 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                   >
                     ({product.reviews})
                   </Typography>
-                </Box>
+                </Box> */}
 
                 {/* Price */}
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mt: "auto", mb: 2 }}>
                   <Typography color="primary" fontWeight="bold">
                     ₦{Number(product.price || 0).toLocaleString()}
                     {/* &#x20A6;{product.price} */}
@@ -314,7 +362,6 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                       color="text.secondary"
                     >
                       ₦{Number(product.comparePrice).toLocaleString()}
-                      {/* &#x20A6;{product.oldPrice} */}
                     </Typography>
                   )}
                 </Box>
@@ -334,19 +381,6 @@ export function ProductSection({ products, initialCategory = "All Products" }) {
                     : "Add to Cart"}
                 </Button>
 
-                {/* <Button
-                  fullWidth
-                  variant="contained"
-                  disabled={product.status === "Out of Stock"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToCart(product);
-                  }}
-                >
-                  {product.status === "Out of Stock"
-                    ? "Out of Stock"
-                    : "Add to Cart"}
-                </Button> */}
                 </Box>
               </Paper>
             </Grid>
